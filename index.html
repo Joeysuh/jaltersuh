@@ -1,44 +1,404 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ebe3d4">
-  <title>Joey</title>
-  <meta name="description" content="Joey, Computer Engineering student at the University of Waterloo. Embedded systems, firmware, and hardware acceleration.">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Joey">
-  <meta property="og:description" content="Computer Engineering student at the University of Waterloo. Embedded systems, firmware, and hardware acceleration.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Joey — Computer Engineering student at the University of Waterloo, interested in embedded systems, firmware, and hardware acceleration.">
+<link rel="icon" href="data:,">
+<title>Joey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#ebe3d4; --paper-2:#e0d6c1; --ink:#1d2a24; --muted:#566050;
+  --rule:#cdc3ac; --green:#1f5e46; --gold:#b88a1e; --card:#f2ecdd;
+  --measure:40rem; --wide:64rem;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#151b18; --paper-2:#1d2622; --ink:#ece4d0; --muted:#a7b1a1;
+    --rule:#38443b; --green:#7cc4a4; --gold:#d3a83c; --card:#1b231f;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:1.0625rem;line-height:1.6}
+a{color:var(--green);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+a:hover{text-decoration-color:var(--gold);text-decoration-thickness:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+button{font:inherit;color:inherit}
+
+/* ---- scroll progress ---- */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:40;background:transparent}
+.progress i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:0 50%}
+
+/* ---- the site ---- */
+.site{max-width:var(--measure);margin:0 auto;padding:1.5rem 1.25rem 3rem}
+.banner-wrap{position:relative;overflow:hidden;border-radius:6px}
+.banner{display:block;width:100%;height:8rem;object-fit:cover;object-position:left center}
+.trace-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.trace-svg circle{opacity:0}
+.sig{position:absolute;right:.6rem;bottom:.45rem;font-size:.72rem;letter-spacing:.06em;color:var(--ink);
+  background:color-mix(in srgb,var(--paper) 82%,transparent);padding:.1rem .45rem;border-radius:999px}
+.site h1{margin:1.75rem 0 .5rem;font-size:clamp(2.4rem,7vw,3.4rem);line-height:1.05;letter-spacing:-.025em;font-weight:700}
+.site h1 .ch{display:inline-block;will-change:transform}
+.role{margin:0;font-size:1.25rem;font-weight:500}
+.intro{max-width:34rem;margin:.5rem 0 0;color:var(--muted)}
+.sitenav{margin-top:1.75rem}
+.sitenav--top{margin-top:0;margin-bottom:1.5rem}
+.sitenav [aria-current="page"]{color:var(--ink);font-weight:700}
+.sitenav ul{display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;margin:0;padding:0;list-style:none}
+.sitenav button{border:0;background:none;padding:0;cursor:pointer;font-size:1rem;color:var(--green);
+  text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+.sitenav button:hover{text-decoration-color:var(--gold);text-decoration-thickness:2px}
+.site h2.page-title{font-size:clamp(2rem,6vw,2.6rem);letter-spacing:-.02em;line-height:1.1;margin:0 0 .25rem}
+.entries{margin:1.75rem 0 0;padding:0;list-style:none;border-top:1px solid var(--rule)}
+.entries>li{border-bottom:1px solid var(--rule)}
+.proj-head{display:block;width:100%;text-align:left;background:none;border:0;padding:1rem 2rem 1rem 0;cursor:pointer;position:relative}
+.proj-head:hover .name{color:var(--green)}
+.name{display:block;font-size:1.1875rem;line-height:1.3;font-weight:700}
+.what{display:block;margin-top:.125rem;color:var(--muted)}
+.chev{position:absolute;right:.5rem;top:1.5rem;width:.55rem;height:.55rem;border-right:2px solid var(--green);
+  border-bottom:2px solid var(--green);transform:rotate(45deg);transition:transform .35s cubic-bezier(.3,.7,.2,1)}
+.proj.open .chev{transform:rotate(225deg)}
+.detail{overflow:hidden;height:0}
+.detail-in{max-width:34rem;padding:0 0 1.25rem}
+.detail p{margin:0 0 .75rem}.detail p:last-child{margin-bottom:0}
+.job{padding:1.25rem 0}
+.job h3{margin:0;font-size:1.1875rem;line-height:1.3;font-weight:700}
+.job .role{margin-top:.125rem;font-size:1.0625rem;font-weight:500}
+.job p{max-width:34rem;margin:.5rem 0 0;color:var(--muted)}
+.prose{max-width:34rem;margin-top:1.5rem}
+.prose p{margin:0 0 1rem}
+.skills{display:grid;grid-template-columns:8.5rem 1fr;gap:.75rem 1.5rem;margin:2rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.skills dt{font-weight:700}.skills dd{margin:0}
+.sitefoot{margin-top:3.5rem;padding-top:1.25rem;border-top:1px solid var(--rule)}
+.sitefoot ul{display:flex;gap:1.25rem;list-style:none;margin:0;padding:0}
+@media (max-width:30rem){.skills{grid-template-columns:1fr;gap:.125rem}.skills dd{margin-bottom:.75rem}}
+
+/* ticker */
+.ticker{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow:hidden;white-space:nowrap;
+  padding:.55rem 0;margin-top:2.5rem;background:var(--paper-2)}
+.ticker-track{display:inline-block;animation:tick 32s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker span{font-size:.9rem;letter-spacing:.08em;color:var(--muted);padding-right:1rem}
+.ticker b{color:var(--green);font-weight:700}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+footer.page{max-width:var(--measure);margin:0 auto;padding:2rem 1.25rem 3.5rem;color:var(--muted);font-size:.92rem}
+footer.page p{margin:.3rem 0}
+footer.page a{color:var(--green)}
+
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none}
+  .chev{transition:none}
+}
+</style>
 </head>
 <body>
-  <a class="skip" href="#content">Skip to content</a>
-  <div class="page">
-    <img class="banner" src="banner.svg" width="1200" height="240" alt="Two signal traces, CANH and CANL, splitting apart and rejoining like a CAN bus waveform">
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
 
-    <main id="content">
-      <h1>Joey</h1>
-      <p class="role">Computer Engineering at the University of Waterloo</p>
-      <p class="intro">I'm interested in embedded systems, firmware, and hardware acceleration.</p>
-
-      <nav aria-label="Main">
+<main>
+  <div class="site">
+    <!-- HOME -->
+    <section id="panel-home" data-panel="home">
+      <div class="banner-wrap" id="bannerWrap">
+        <img class="banner" id="bannerImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDI0MCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iMjQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNBTkggYW5kIENBTkwgZGlmZmVyZW50aWFsIHNpZ25hbCB0cmFjZXMsIGRyYXduIGFzIHR3byBsaW5lcyB0aGF0IHNwbGl0IGFwYXJ0IGFuZCByZWpvaW4iPgogIDxzdHlsZT4KICAgIC5ncmlkIHBhdGggeyBzdHJva2U6ICNjZmM0YWM7IHN0cm9rZS13aWR0aDogMTsgZmlsbDogbm9uZTsgfQogICAgLm1pZCB7IHN0cm9rZTogI2IzYTY4Yjsgc3Ryb2tlLXdpZHRoOiAxLjU7IHN0cm9rZS1kYXNoYXJyYXk6IDQgODsgZmlsbDogbm9uZTsgfQogICAgLmgsIC5sIHsgZmlsbDogbm9uZTsgc3Ryb2tlLXdpZHRoOiA1OyBzdHJva2UtbGluZWpvaW46IHJvdW5kOyBzdHJva2UtbGluZWNhcDogcm91bmQ7IH0KICAgIC5oIHsgc3Ryb2tlOiAjMWY1ZTQ2OyB9CiAgICAubCB7IHN0cm9rZTogIzFkMmEyNDsgfQogICAgQG1lZGlhIChwcmVmZXJzLXJlZHVjZWQtbW90aW9uOiBuby1wcmVmZXJlbmNlKSB7CiAgICAgIC5oLCAubCB7IHN0cm9rZS1kYXNoYXJyYXk6IDE7IGFuaW1hdGlvbjogZHJhdyAyLjJzIGN1YmljLWJlemllciguMywuNiwuMiwxKSBib3RoOyB9CiAgICAgIC5sIHsgYW5pbWF0aW9uLWRlbGF5OiAuMThzOyB9CiAgICB9CiAgICBAa2V5ZnJhbWVzIGRyYXcgeyBmcm9tIHsgc3Ryb2tlLWRhc2hvZmZzZXQ6IDE7IH0gdG8geyBzdHJva2UtZGFzaG9mZnNldDogMDsgfSB9CiAgPC9zdHlsZT4KICA8cmVjdCB3aWR0aD0iMTIwMCIgaGVpZ2h0PSIyNDAiIGZpbGw9IiNlMGQ2YzEiIC8+CiAgPGcgY2xhc3M9ImdyaWQiPjxwYXRoIGQ9Ik0wIDBWMjQwIiAvPjxwYXRoIGQ9Ik02MCAwVjI0MCIgLz48cGF0aCBkPSJNMTIwIDBWMjQwIiAvPjxwYXRoIGQ9Ik0xODAgMFYyNDAiIC8+PHBhdGggZD0iTTI0MCAwVjI0MCIgLz48cGF0aCBkPSJNMzAwIDBWMjQwIiAvPjxwYXRoIGQ9Ik0zNjAgMFYyNDAiIC8+PHBhdGggZD0iTTQyMCAwVjI0MCIgLz48cGF0aCBkPSJNNDgwIDBWMjQwIiAvPjxwYXRoIGQ9Ik01NDAgMFYyNDAiIC8+PHBhdGggZD0iTTYwMCAwVjI0MCIgLz48cGF0aCBkPSJNNjYwIDBWMjQwIiAvPjxwYXRoIGQ9Ik03MjAgMFYyNDAiIC8+PHBhdGggZD0iTTc4MCAwVjI0MCIgLz48cGF0aCBkPSJNODQwIDBWMjQwIiAvPjxwYXRoIGQ9Ik05MDAgMFYyNDAiIC8+PHBhdGggZD0iTTk2MCAwVjI0MCIgLz48cGF0aCBkPSJNMTAyMCAwVjI0MCIgLz48cGF0aCBkPSJNMTA4MCAwVjI0MCIgLz48cGF0aCBkPSJNMTE0MCAwVjI0MCIgLz48cGF0aCBkPSJNMTIwMCAwVjI0MCIgLz48cGF0aCBkPSJNMCAwSDEyMDAiIC8+PHBhdGggZD0iTTAgNjBIMTIwMCIgLz48cGF0aCBkPSJNMCAxMjBIMTIwMCIgLz48cGF0aCBkPSJNMCAxODBIMTIwMCIgLz48cGF0aCBkPSJNMCAyNDBIMTIwMCIgLz48L2c+CiAgPHBhdGggY2xhc3M9Im1pZCIgZD0iTTAgMTIwSDEyMDAiIC8+CiAgPHBhdGggY2xhc3M9ImwiIHBhdGhMZW5ndGg9IjEiIGQ9Ik0wIDEyNCBMNzYuMCAxMjQgTDg0LjAgMTc0IEwxMTYuMCAxNzQgTDEyNC4wIDEyNCBMMTk2LjAgMTI0IEwyMDQuMCAxNzQgTDIzNi4wIDE3NCBMMjQ0LjAgMTI0IEwyNzYuMCAxMjQgTDI4NC4wIDE3NCBMMzU2LjAgMTc0IEwzNjQuMCAxMjQgTDM5Ni4wIDEyNCBMNDA0LjAgMTc0IEw0MzYuMCAxNzQgTDQ0NC4wIDEyNCBMNTU2LjAgMTI0IEw1NjQuMCAxNzQgTDY3Ni4wIDE3NCBMNjg0LjAgMTI0IEw3MTYuMCAxMjQgTDcyNC4wIDE3NCBMNzU2LjAgMTc0IEw3NjQuMCAxMjQgTDgzNi4wIDEyNCBMODQ0LjAgMTc0IEw4NzYuMCAxNzQgTDg4NC4wIDEyNCBMMTAzNi4wIDEyNCBMMTA0NC4wIDE3NCBMMTExNi4wIDE3NCBMMTEyNC4wIDEyNCBMMTIwMCAxMjQiIC8+CiAgPHBhdGggY2xhc3M9ImgiIHBhdGhMZW5ndGg9IjEiIGQ9Ik0wIDExNiBMNzYuMCAxMTYgTDg0LjAgNjYgTDExNi4wIDY2IEwxMjQuMCAxMTYgTDE5Ni4wIDExNiBMMjA0LjAgNjYgTDIzNi4wIDY2IEwyNDQuMCAxMTYgTDI3Ni4wIDExNiBMMjg0LjAgNjYgTDM1Ni4wIDY2IEwzNjQuMCAxMTYgTDM5Ni4wIDExNiBMNDA0LjAgNjYgTDQzNi4wIDY2IEw0NDQuMCAxMTYgTDU1Ni4wIDExNiBMNTY0LjAgNjYgTDY3Ni4wIDY2IEw2ODQuMCAxMTYgTDcxNi4wIDExNiBMNzI0LjAgNjYgTDc1Ni4wIDY2IEw3NjQuMCAxMTYgTDgzNi4wIDExNiBMODQ0LjAgNjYgTDg3Ni4wIDY2IEw4ODQuMCAxMTYgTDEwMzYuMCAxMTYgTDEwNDQuMCA2NiBMMTExNi4wIDY2IEwxMTI0LjAgMTE2IEwxMjAwIDExNiIgLz4KPC9zdmc+Cg==" width="1200" height="240" alt="Two signal traces, CANH and CANL, splitting apart and rejoining like a CAN bus waveform">
+        <svg class="trace-svg" viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
+          <path id="tracePath" d="M0 116 L76 116 L84 66 L116 66 L124 116 L196 116 L204 66 L236 66 L244 116 L276 116 L284 66 L356 66 L364 116 L396 116 L404 66 L436 66 L444 116 L556 116 L564 66 L676 66 L684 116 L716 116 L724 66 L756 66 L764 116 L836 116 L844 66 L876 66 L884 116 L1036 116 L1044 66 L1116 66 L1124 116 L1200 116" fill="none" stroke="none"/>
+          <circle id="traceDot" r="8" fill="#b88a1e"/>
+        </svg>
+        <span class="sig">CANH · CANL · differential pair</span>
+      </div>
+      <h1 id="heroName" aria-label="Joey">Joey</h1>
+      <p class="role" data-hero>Computer Engineering at the University of Waterloo</p>
+      <p class="intro" data-hero>I&rsquo;m interested in embedded systems, firmware, and hardware acceleration.</p>
+      <nav class="sitenav" aria-label="Site">
         <ul>
-          <li><a href="projects.html">projects</a></li>
-          <li><a href="experience.html">experience</a></li>
-          <li><a href="about.html">about</a></li>
+          <li><button class="magnetic" type="button" data-goto="projects">projects</button></li>
+          <li><button class="magnetic" type="button" data-goto="experience">experience</button></li>
+          <li><button class="magnetic" type="button" data-goto="about">about</button></li>
         </ul>
       </nav>
-    </main>
+    </section>
 
-    <footer>
-      <ul>
-        <li><a href="https://github.com/Joeysuh">GitHub</a></li>
+    <!-- PROJECTS -->
+    <section id="panel-projects" data-panel="projects" hidden>
+      <nav class="sitenav sitenav--top" aria-label="Site">
+        <ul>
+          <li><button class="magnetic" type="button" data-goto="home">home</button></li>
+          <li><span aria-current="page">projects</span></li>
+          <li><button class="magnetic" type="button" data-goto="experience">experience</button></li>
+          <li><button class="magnetic" type="button" data-goto="about">about</button></li>
+        </ul>
+      </nav>
+      <h2 class="page-title">Projects</h2>
+      <ul class="entries">
+        <li class="proj" data-reveal>
+          <button class="proj-head" type="button" aria-expanded="false">
+            <span class="name">Bare-metal RTOS</span>
+            <span class="what">EDF scheduler and heap allocator on an STM32F401RE</span>
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="detail"><div class="detail-in">
+            <p>A real-time kernel for the STM32F401RE that runs without a vendor OS. It schedules tasks by earliest deadline first.</p>
+            <p>It also has a custom heap allocator that merges adjacent free blocks and uses magic numbers to catch memory corruption.</p>
+          </div></div>
+        </li>
+        <li class="proj" data-reveal>
+          <button class="proj-head" type="button" aria-expanded="false">
+            <span class="name">ALIVE</span>
+            <span class="what">Biometric wearable with an adaptive game</span>
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="detail"><div class="detail-in">
+            <p>Capstone project: a wearable that reads biometrics and feeds an adaptive game built in Unreal Engine 5.</p>
+            <p>My section is the biometric acquisition unit. It pairs an STM32F401RE with an ESP32 co-processor and reads a MAX30102 pulse sensor, an MPU-6050 IMU, and a galvanic skin response sensor. A fourth-order Butterworth band-pass filter cleans the signal. The unit also includes battery charging and a haptic motor driver.</p>
+          </div></div>
+        </li>
+        <li class="proj" data-reveal>
+          <button class="proj-head" type="button" aria-expanded="false">
+            <span class="name">BitWave accelerator</span>
+            <span class="what">RTL for a hardware accelerator paper</span>
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="detail"><div class="detail-in">
+            <p>ECE 493 team project implementing the BitWave accelerator paper.</p>
+            <p>I own the RTL interface, memory, and integration. That includes single-port and banked SRAM modules in SystemVerilog, verified against a Python golden model with cocotb.</p>
+          </div></div>
+        </li>
+        <li class="proj" data-reveal>
+          <button class="proj-head" type="button" aria-expanded="false">
+            <span class="name">Multi-precision dot-product unit</span>
+            <span class="what">16 lanes in SystemVerilog</span>
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="detail"><div class="detail-in">
+            <p>A 16-lane dot-product unit that handles FP16, BF16, TF32, FP8, MXFP8, and UINT8.</p>
+            <p>I wrote a Python replica of the reference behavior first, then checked the RTL against test vectors until the outputs matched bit for bit.</p>
+          </div></div>
+        </li>
+        <li class="proj" data-reveal>
+          <button class="proj-head" type="button" aria-expanded="false">
+            <span class="name">FPGA matrix-vector multiplier</span>
+            <span class="what">Pipelined, eight parallel lanes</span>
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="detail"><div class="detail-in">
+            <p>A pipelined matrix-vector multiplier with eight parallel lanes, written in SystemVerilog.</p>
+          </div></div>
+        </li>
       </ul>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="panel-experience" data-panel="experience" hidden>
+      <nav class="sitenav sitenav--top" aria-label="Site">
+        <ul>
+          <li><button class="magnetic" type="button" data-goto="home">home</button></li>
+          <li><button class="magnetic" type="button" data-goto="projects">projects</button></li>
+          <li><span aria-current="page">experience</span></li>
+          <li><button class="magnetic" type="button" data-goto="about">about</button></li>
+        </ul>
+      </nav>
+      <h2 class="page-title">Experience</h2>
+      <ul class="entries">
+        <li class="job" data-reveal>
+          <h3>Harbinger Motors</h3>
+          <p class="role">Intern</p>
+          <p>Validated over-the-air firmware updates. Worked on DoCAN and DoIP diagnostics, MACsec, and the TCU.</p>
+        </li>
+        <li class="job" data-reveal>
+          <h3>Ford Motor Company</h3>
+          <p class="role">Intern</p>
+          <p>Worked on a multi-threaded ECU simulation, including debugging deadlocks, and on CAN and DoIP diagnostics.</p>
+        </li>
+        <li class="job" data-reveal>
+          <h3>UWaterloo FSAE team</h3>
+          <p class="role">Member</p>
+          <p>Bring-up of hardware-in-the-loop and software-in-the-loop test setups, and firmware for the BMU.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="panel-about" data-panel="about" hidden>
+      <nav class="sitenav sitenav--top" aria-label="Site">
+        <ul>
+          <li><button class="magnetic" type="button" data-goto="home">home</button></li>
+          <li><button class="magnetic" type="button" data-goto="projects">projects</button></li>
+          <li><button class="magnetic" type="button" data-goto="experience">experience</button></li>
+          <li><span aria-current="page">about</span></li>
+        </ul>
+      </nav>
+      <h2 class="page-title">About</h2>
+      <div class="prose" data-reveal>
+        <p>I&rsquo;m a Computer Engineering student at the University of Waterloo, graduating in 2027.</p>
+        <p>I like work close to the hardware: bare-metal firmware, real-time scheduling, and hardware acceleration. Most of my time goes to C, C++, Python, and SystemVerilog.</p>
+        <p>Outside class, I work on test setups and firmware for the Waterloo FSAE team.</p>
+      </div>
+      <dl class="skills" data-reveal>
+        <dt>Languages</dt><dd>C, C++, Python, SystemVerilog</dd>
+        <dt>Embedded</dt><dd>STM32, ESP32, RTOS, bare-metal firmware</dd>
+        <dt>Automotive</dt><dd>CAN, DoCAN, DoIP, MACsec</dd>
+        <dt>Hardware</dt><dd>RTL design, FPGA, cocotb verification</dd>
+      </dl>
+    </section>
+
+    <footer class="sitefoot">
+      <ul><li><a href="https://github.com/Joeysuh">GitHub</a></li></ul>
     </footer>
   </div>
+</main>
+
+<!-- stack ticker -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="tickerTrack">
+    <span><b>C</b> · C++ · <b>Python</b> · SystemVerilog · <b>STM32</b> · ESP32 · RTOS · <b>CAN</b> · DoCAN · DoIP · MACsec · <b>RTL</b> · FPGA · cocotb ·&nbsp;</span>
+  </div>
+</div>
+
+<footer class="page">
+  <p>Joey — Computer Engineering, University of Waterloo.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var motionOn = !reduceMotion;
+  var hasGsap = typeof window.gsap !== "undefined";
+  var lenis = null, triggers = [], introTl = null;
+
+  /* ---------- ticker: duplicate content for a seamless loop ---------- */
+  var track = document.getElementById("tickerTrack");
+  track.innerHTML += track.innerHTML;
+
+  /* ---------- split hero name into letters ---------- */
+  var hero = document.getElementById("heroName");
+  var text = hero.textContent;
+  hero.setAttribute("aria-label", text);
+  hero.innerHTML = "";
+  text.split("").forEach(function(ch){
+    var s = document.createElement("span");
+    s.className = "ch"; s.setAttribute("aria-hidden","true"); s.textContent = ch;
+    hero.appendChild(s);
+  });
+
+  /* ---------- project expand (smooth, not native snap) ---------- */
+  document.querySelectorAll(".proj").forEach(function(item){
+    var head = item.querySelector(".proj-head");
+    var detail = item.querySelector(".detail");
+    head.addEventListener("click", function(){
+      var open = item.classList.toggle("open");
+      head.setAttribute("aria-expanded", String(open));
+      if (hasGsap && motionOn) {
+        gsap.to(detail, {height: open ? "auto" : 0, duration: .55, ease: "power3.inOut", overwrite: true,
+          onComplete: function(){ if (window.ScrollTrigger) ScrollTrigger.refresh(); }});
+      } else {
+        detail.style.height = open ? "auto" : "0px";
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      }
+    });
+  });
+
+  /* ---------- page switching ---------- */
+  var panels = Array.prototype.slice.call(document.querySelectorAll("[data-panel]"));
+  function showPanel(name){
+    panels.forEach(function(p){
+      var on = p.getAttribute("data-panel") === name;
+      p.hidden = !on;
+      if (on && hasGsap && motionOn) {
+        gsap.fromTo(p, {opacity: 0, y: 14}, {opacity: 1, y: 0, duration: .5, ease: "power3.out", overwrite: true});
+        var kids = p.querySelectorAll("[data-reveal], .page-title, .sitenav");
+        gsap.fromTo(kids, {opacity: 0, y: 18}, {opacity: 1, y: 0, duration: .55, stagger: .07, ease: "power3.out", overwrite: true, clearProps: "opacity,transform"});
+      } else if (on) {
+        p.style.opacity = ""; p.style.transform = "";
+      }
+    });
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+  document.querySelectorAll("[data-goto]").forEach(function(b){
+    b.addEventListener("click", function(){
+      showPanel(b.getAttribute("data-goto"));
+      window.scrollTo({top: 0, behavior: motionOn ? "smooth" : "auto"});
+    });
+  });
+
+  /* ---------- motion engine ---------- */
+  function initMotion(){
+    if (!hasGsap) return;
+    gsap.registerPlugin(ScrollTrigger);
+    if (window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);
+
+    /* Lenis smooth scroll, synced to ScrollTrigger */
+    if (typeof window.Lenis !== "undefined" && !lenis) {
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    }
+    if (lenis) lenis.start();
+
+    /* intro timeline: banner wipe + hero letters */
+    introTl = gsap.timeline({defaults: {ease: "power3.out"}});
+    introTl.fromTo("#bannerWrap", {clipPath: "inset(0 100% 0 0)"}, {clipPath: "inset(0 0% 0 0)", duration: 1.1, ease: "power3.inOut"}, 0)
+      .fromTo("#bannerImg", {scale: 1.06}, {scale: 1, duration: 1.4}, 0)
+      .fromTo("#heroName .ch", {yPercent: 110, rotate: 4}, {yPercent: 0, rotate: 0, duration: .7, stagger: .06}, .35)
+      .fromTo("[data-hero]", {opacity: 0, y: 16}, {opacity: 1, y: 0, duration: .6, stagger: .12}, .7)
+      .fromTo(".sitenav li", {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .45, stagger: .07}, .95);
+
+    /* gold pulse travelling the CANH trace (same path as the banner art) */
+    if (window.MotionPathPlugin) {
+      var dot = document.getElementById("traceDot");
+      gsap.set(dot, {opacity: 1});
+      gsap.to(dot, {duration: 6, repeat: -1, ease: "none",
+        motionPath: {path: "#tracePath", align: "#tracePath", alignOrigin: [.5, .5]}});
+    }
+
+    /* banner parallax */
+    triggers.push(gsap.to("#bannerImg", {yPercent: 12, ease: "none",
+      scrollTrigger: {trigger: "#bannerWrap", start: "top bottom", end: "bottom top", scrub: true}}));
+
+    /* scroll progress */
+    triggers.push(gsap.to("#progressBar", {scaleX: 1, ease: "none",
+      scrollTrigger: {trigger: document.body, start: "top top", end: "bottom bottom", scrub: .3}}));
+
+    /* scroll reveals for everything below the fold */
+    gsap.utils.toArray("[data-reveal], .page-title").forEach(function(el){
+      triggers.push(gsap.from(el, {opacity: 0, y: 26, duration: .7, ease: "power3.out",
+        scrollTrigger: {trigger: el, start: "top 88%", once: true}}));
+    });
+
+    /* magnetic hover on nav links */
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.querySelectorAll(".magnetic").forEach(function(el){
+        var xTo = gsap.quickTo(el, "x", {duration: .4, ease: "power3"});
+        var yTo = gsap.quickTo(el, "y", {duration: .4, ease: "power3"});
+        el.addEventListener("mousemove", function(e){
+          var r = el.getBoundingClientRect();
+          xTo((e.clientX - (r.left + r.width / 2)) * .3);
+          yTo((e.clientY - (r.top + r.height / 2)) * .3);
+        });
+        el.addEventListener("mouseleave", function(){ xTo(0); yTo(0); });
+      });
+    }
+    ScrollTrigger.refresh();
+  }
+
+  /* go */
+  if (motionOn) { initMotion(); }
+})();
+</script>
 </body>
 </html>
