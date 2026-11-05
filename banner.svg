@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="1200" height="240" role="img" aria-label="CANH and CANL differential signal traces, drawn as two lines that split apart and rejoin">
+  <style>
+    .grid path { stroke: #cfc4ac; stroke-width: 1; fill: none; }
+    .mid { stroke: #b3a68b; stroke-width: 1.5; stroke-dasharray: 4 8; fill: none; }
+    .h, .l { fill: none; stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
+    .h { stroke: #1f5e46; }
+    .l { stroke: #1d2a24; }
+    @media (prefers-reduced-motion: no-preference) {
+      .h, .l { stroke-dasharray: 1; animation: draw 2.2s cubic-bezier(.3,.6,.2,1) both; }
+      .l { animation-delay: .18s; }
+    }
+    @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  </style>
+  <rect width="1200" height="240" fill="#e0d6c1" />
+  <g class="grid"><path d="M0 0V240" /><path d="M60 0V240" /><path d="M120 0V240" /><path d="M180 0V240" /><path d="M240 0V240" /><path d="M300 0V240" /><path d="M360 0V240" /><path d="M420 0V240" /><path d="M480 0V240" /><path d="M540 0V240" /><path d="M600 0V240" /><path d="M660 0V240" /><path d="M720 0V240" /><path d="M780 0V240" /><path d="M840 0V240" /><path d="M900 0V240" /><path d="M960 0V240" /><path d="M1020 0V240" /><path d="M1080 0V240" /><path d="M1140 0V240" /><path d="M1200 0V240" /><path d="M0 0H1200" /><path d="M0 60H1200" /><path d="M0 120H1200" /><path d="M0 180H1200" /><path d="M0 240H1200" /></g>
+  <path class="mid" d="M0 120H1200" />
+  <path class="l" pathLength="1" d="M0 124 L76.0 124 L84.0 174 L116.0 174 L124.0 124 L196.0 124 L204.0 174 L236.0 174 L244.0 124 L276.0 124 L284.0 174 L356.0 174 L364.0 124 L396.0 124 L404.0 174 L436.0 174 L444.0 124 L556.0 124 L564.0 174 L676.0 174 L684.0 124 L716.0 124 L724.0 174 L756.0 174 L764.0 124 L836.0 124 L844.0 174 L876.0 174 L884.0 124 L1036.0 124 L1044.0 174 L1116.0 174 L1124.0 124 L1200 124" />
+  <path class="h" pathLength="1" d="M0 116 L76.0 116 L84.0 66 L116.0 66 L124.0 116 L196.0 116 L204.0 66 L236.0 66 L244.0 116 L276.0 116 L284.0 66 L356.0 66 L364.0 116 L396.0 116 L404.0 66 L436.0 66 L444.0 116 L556.0 116 L564.0 66 L676.0 66 L684.0 116 L716.0 116 L724.0 66 L756.0 66 L764.0 116 L836.0 116 L844.0 66 L876.0 66 L884.0 116 L1036.0 116 L1044.0 66 L1116.0 66 L1124.0 116 L1200 116" />
+</svg>
