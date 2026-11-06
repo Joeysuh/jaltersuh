@@ -232,7 +232,7 @@
         return links ? "<p>You can find me here:</p>" + links : "<p>Links are coming soon.</p>";
       } },
     { id: "site", keys: ["this site", "website", "site", "chatbot", "bot", "ai", "built this", "how was this made", "pictures", "images"],
-      answer: function () { return "<p>This site is plain HTML, CSS and a little JavaScript on GitHub Pages. I'm a scripted helper that answers from what's on the site, so nothing you type leaves your browser. The pictures are generated and dithered, in the style of an old engraving.</p>"; } },
+      answer: function () { return "<p>This site is plain HTML, CSS and a little JavaScript on GitHub Pages. I'm a scripted helper that answers from what's on the site, so nothing you type leaves your browser. The banner is an impressionist painting of a poppy field, and the project pictures are generated and dithered like old engravings.</p>"; } },
     { id: "thanks", keys: ["thanks", "thank you", "ty", "cool", "nice", "awesome"],
       answer: function () { return "<p>Thanks for stopping by!</p>"; } }
   ];

@@ -1,9 +1,9 @@
-/* Engineering-paper palette: pale green paper, dark green ink, and one red-pencil
-   accent kept for the button each panel wants pressed. */
+/* Tesla-inspired palette: two bases (white and near-black) do the work, and
+   one red accent is kept for the button each panel wants pressed. */
 :root{
-  --paper:#e9ece4; --paper-2:#dfe4d8; --ink:#1b2a22; --muted:#56625a;
-  --rule:#c6cdbf; --link:#1f5e46;
-  --accent:#c2362b; --accent-hover:#a82c22; --on-accent:#ffffff;
+  --paper:#ffffff; --paper-2:#f4f4f4; --ink:#171a20; --muted:#5c5e62;
+  --rule:#e2e3e3; --link:#171a20;
+  --accent:#e31937; --accent-hover:#c4142e; --on-accent:#ffffff;
   --measure:42rem;
   --serif:"Young Serif",Georgia,"Times New Roman",serif;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -12,9 +12,9 @@
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --paper:#121c16; --paper-2:#18241d; --ink:#e2e8dc; --muted:#a3ae9f;
-    --rule:#2b3a31; --link:#93d0ae;
-    --accent:#ff7d6e; --accent-hover:#ff9a8e; --on-accent:#121c16;
+    --paper:#171a20; --paper-2:#22262e; --ink:#eeeeee; --muted:#a2a3a6;
+    --rule:#33373f; --link:#eeeeee;
+    --accent:#e31937; --accent-hover:#f0304c; --on-accent:#ffffff;
     color-scheme:dark;
   }
 }
@@ -32,7 +32,7 @@ img{max-width:100%}
 
 /* ---- home ---- */
 .banner{display:block;margin:0}
-.banner img{display:block;width:100%;height:auto;aspect-ratio:1408/576}
+.banner img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
 @media (prefers-reduced-motion:no-preference){
   /* one entrance: the banner prints top to bottom, a line at a time */
   .banner img{animation:print 1.4s steps(28,end) both}
@@ -95,9 +95,9 @@ h1,h2,h3{font-family:var(--serif);font-weight:400}
 
 /* ---- about: my name on a CAN bus ---- */
 .scope{margin:2.5rem 0 0}
-.scope-panel{--scope-bg:#14261c;--scope-ink:#e9ece4;--scope-low:#7fbf98;--scope-grid:rgba(233,236,228,.09);
+.scope-panel{--scope-bg:#171a20;--scope-ink:#eeeeee;--scope-low:#8e9095;--scope-grid:rgba(238,238,238,.08);
   background:var(--scope-bg);color:var(--scope-ink)}
-@media (prefers-color-scheme: dark){.scope-panel{--scope-bg:#0b140f;outline:1px solid var(--rule)}}
+@media (prefers-color-scheme: dark){.scope-panel{--scope-bg:#0e1014;outline:1px solid var(--rule)}}
 .scope-screen{position:relative;height:clamp(8rem,22vw,11rem);
   background-image:linear-gradient(var(--scope-grid) 1px,transparent 1px),linear-gradient(90deg,var(--scope-grid) 1px,transparent 1px);
   background-size:12.5% 25%}
@@ -108,11 +108,11 @@ h1,h2,h3{font-family:var(--serif);font-weight:400}
 .band{fill:var(--scope-ink);opacity:0;transition:opacity .2s ease}.band.on{opacity:.11}
 .bytes{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none}
 .byte{display:flex;flex-direction:column;width:100%;margin:0;padding:.6rem .4rem .7rem .8rem;border:0;
-  border-left:1px solid rgba(233,236,228,.18);background:transparent;color:inherit;text-align:left;cursor:pointer}
-.byte:hover,.byte[aria-pressed="true"]{background:rgba(233,236,228,.1)}
+  border-left:1px solid rgba(238,238,238,.18);background:transparent;color:inherit;text-align:left;cursor:pointer}
+.byte:hover,.byte[aria-pressed="true"]{background:rgba(238,238,238,.1)}
 .byte:focus-visible{outline:2px solid var(--scope-ink);outline-offset:-3px}
 .glyph{font-family:var(--serif);font-size:1.75rem;line-height:1.15}
-.bin{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;color:rgba(233,236,228,.72)}
+.bin{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;color:rgba(238,238,238,.72)}
 .scope figcaption{margin:.6rem 0 0;font-size:.9375rem;color:var(--muted)}
 
 footer.sitefoot{margin-top:3.5rem;padding-top:1.25rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.9375rem}
