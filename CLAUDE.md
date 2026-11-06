@@ -42,7 +42,7 @@ One narrow centered column, generous whitespace, one typeface system, one small 
 
 - Small single-color line-art open-wheel F1 silhouette, navy `#1b2547`, about 56px wide, inline SVG.
 - Drives on a thin 1px track line fixed at the very bottom edge of the viewport.
-- Crosses left to right once every ~25s, taking ~2.5s, ease-in-out, then disappears until the next pass.
+- Crosses left to right once every ~10s (first pass 4s after load), taking ~2.5s, ease-in-out, then disappears until the next pass.
 - No sound, no trail, never overlaps content (the lane is opaque cream, and the page has bottom padding so the footer clears it).
 - Fully disabled under `prefers-reduced-motion` (lane hidden). Paused when the tab is hidden (`visibilitychange` toggles `.tab-hidden`).
 

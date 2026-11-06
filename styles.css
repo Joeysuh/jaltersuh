@@ -71,14 +71,14 @@ button{font:inherit;color:inherit}
 @media (prefers-reduced-motion:no-preference){
   /* 1. the trace sweeps in once, like a scope, then holds */
   .can{animation:sweep 1.4s cubic-bezier(.3,0,.2,1) .15s both}
-  /* 2. one pass every 25s: 2.5s across, ease-in-out, then off-screen until the next */
-  .car{animation:pass 25s 4s infinite both}
+  /* 2. one pass every 10s: 2.5s across, ease-in-out, then off-screen until the next */
+  .car{animation:pass 10s 4s infinite both}
   .tab-hidden .car{animation-play-state:paused}
 }
 @keyframes sweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @keyframes pass{
   0%{transform:translateX(-60px);animation-timing-function:cubic-bezier(.45,0,.55,1)}
-  10%,100%{transform:translateX(calc(100vw + 4px))}
+  25%,100%{transform:translateX(calc(100vw + 4px))}
 }
 @media (prefers-reduced-motion:reduce){
   .lane{display:none}
