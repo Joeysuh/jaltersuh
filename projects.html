@@ -3,10 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ebe3d4">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ebe3d4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f2a1c" media="(prefers-color-scheme: dark)">
   <title>Projects · Joey</title>
   <meta name="description" content="Selected projects in firmware, real-time systems, and hardware design.">
+  <script>document.documentElement.classList.add('js')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
@@ -17,7 +19,7 @@
   <div class="page">
     <a class="back" href="index.html">← Home</a>
 
-    <main id="content">
+    <main id="content" class="col">
       <h1>Projects</h1>
 
       <ul class="entries">
@@ -81,13 +83,20 @@
           </details>
         </li>
       </ul>
+
+      <p class="actions"><a class="btn" href="https://github.com/Joeysuh">See the code on GitHub</a></p>
     </main>
 
-    <footer>
+    <footer class="col">
       <ul>
-        <li><a href="https://github.com/Joeysuh">GitHub</a></li>
+        <li><a href="index.html">home</a></li>
+        <li><a href="experience.html">experience</a></li>
+        <li><a href="about.html">about</a></li>
       </ul>
     </footer>
   </div>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/lenis.min.js" defer></script>
+  <script src="main.js" defer></script>
 </body>
 </html>

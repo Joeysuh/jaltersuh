@@ -3,42 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ebe3d4">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ebe3d4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f2a1c" media="(prefers-color-scheme: dark)">
   <title>Joey</title>
   <meta name="description" content="Joey, Computer Engineering student at the University of Waterloo. Embedded systems, firmware, and hardware acceleration.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Joey">
   <meta property="og:description" content="Computer Engineering student at the University of Waterloo. Embedded systems, firmware, and hardware acceleration.">
+  <script>document.documentElement.classList.add('js')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="home">
   <a class="skip" href="#content">Skip to content</a>
   <div class="page">
-    <img class="banner" src="banner.svg" width="1200" height="240" alt="Two signal traces, CANH and CANL, splitting apart and rejoining like a CAN bus waveform">
+    <figure class="scope">
+      <div class="scope-panel">
+        <div class="scope-screen" id="scope">
+          <noscript><img src="banner.svg" width="1200" height="300" alt=""></noscript>
+        </div>
+        <ul class="bytes">
+          <li><button type="button" class="byte" data-bits="01001010" aria-pressed="false"><span class="ch">J</span><span class="bin">01001010</span></button></li>
+          <li><button type="button" class="byte" data-bits="01101111" aria-pressed="false"><span class="ch">o</span><span class="bin">01101111</span></button></li>
+          <li><button type="button" class="byte" data-bits="01100101" aria-pressed="false"><span class="ch">e</span><span class="bin">01100101</span></button></li>
+          <li><button type="button" class="byte" data-bits="01111001" aria-pressed="false"><span class="ch">y</span><span class="bin">01111001</span></button></li>
+        </ul>
+      </div>
+      <figcaption>My name as ASCII bytes on a CAN bus. <span class="hint">Select a letter to find its byte.</span></figcaption>
+    </figure>
 
-    <main id="content">
+    <main id="content" class="col">
       <h1>Joey</h1>
       <p class="role">Computer Engineering at the University of Waterloo</p>
       <p class="intro">I'm interested in embedded systems, firmware, and hardware acceleration.</p>
 
-      <nav aria-label="Main">
-        <ul>
-          <li><a href="projects.html">projects</a></li>
-          <li><a href="experience.html">experience</a></li>
-          <li><a href="about.html">about</a></li>
-        </ul>
+      <nav class="actions" aria-label="Main">
+        <a class="btn" href="projects.html">See projects</a>
+        <a href="experience.html">experience</a>
+        <a href="about.html">about</a>
       </nav>
     </main>
 
-    <footer>
+    <footer class="col">
       <ul>
         <li><a href="https://github.com/Joeysuh">GitHub</a></li>
       </ul>
     </footer>
   </div>
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/lenis.min.js" defer></script>
+  <script src="main.js" defer></script>
 </body>
 </html>
