@@ -4,23 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Joey — Computer Engineering student at the University of Waterloo, interested in embedded systems, firmware, and hardware acceleration.">
+<meta name="theme-color" content="#ebe3d4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f2a1c" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Joey. Computer Engineering student at the University of Waterloo, interested in embedded systems, firmware, and hardware acceleration.">
 <link rel="icon" href="data:,">
 <title>Joey</title>
+<script>document.documentElement.classList.add("js")</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap">
 <style>
+/* Two bases (sand and forest) plus one accent. The accent is only used on the
+   button each page wants pressed. */
 :root{
-  --paper:#ebe3d4; --paper-2:#e0d6c1; --ink:#1d2a24; --muted:#566050;
-  --rule:#cdc3ac; --green:#1f5e46; --gold:#b88a1e; --card:#f2ecdd;
+  --paper:#ebe3d4; --paper-2:#e0d6c1; --ink:#12281b; --muted:#4f5b50;
+  --rule:#cdc3ac; --green:#1f5e46; --card:#f2ecdd;
+  --accent:#6a2cff; --accent-hover:#5a1ee6; --on-accent:#ffffff;
   --measure:40rem; --wide:64rem;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --paper:#151b18; --paper-2:#1d2622; --ink:#ece4d0; --muted:#a7b1a1;
-    --rule:#38443b; --green:#7cc4a4; --gold:#d3a83c; --card:#1b231f;
+    --paper:#0f2a1c; --paper-2:#0a1c13; --ink:#ebe3d4; --muted:#a9b5a4;
+    --rule:#264233; --green:#8fd1ad; --card:#143323;
+    --accent:#9a78ff; --accent-hover:#b199ff; --on-accent:#0f2a1c;
     color-scheme:dark;
   }
 }
@@ -30,33 +37,29 @@ body{margin:0;background:var(--paper);color:var(--ink);
   font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   font-size:1.0625rem;line-height:1.6}
 a{color:var(--green);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
-a:hover{text-decoration-color:var(--gold);text-decoration-thickness:2px}
-a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:2px}
 button{font:inherit;color:inherit}
 
 /* ---- scroll progress ---- */
 .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:40;background:transparent}
-.progress i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:0 50%}
+.progress i{display:block;height:100%;background:var(--green);transform:scaleX(0);transform-origin:0 50%}
 
 /* ---- the site ---- */
-.site{max-width:var(--measure);margin:0 auto;padding:1.5rem 1.25rem 3rem}
-.banner-wrap{position:relative;overflow:hidden;border-radius:6px}
-.banner{display:block;width:100%;height:8rem;object-fit:cover;object-position:left center}
-.trace-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.trace-svg circle{opacity:0}
-.sig{position:absolute;right:.6rem;bottom:.45rem;font-size:.72rem;letter-spacing:.06em;color:var(--ink);
-  background:color-mix(in srgb,var(--paper) 82%,transparent);padding:.1rem .45rem;border-radius:999px}
+.site{max-width:var(--wide);margin:0 auto;padding:1.5rem 1.25rem 3rem}
+.site [data-panel]>:not(.scope),.sitefoot{max-width:var(--measure)}
 .site h1{margin:1.75rem 0 .5rem;font-size:clamp(2.4rem,7vw,3.4rem);line-height:1.05;letter-spacing:-.025em;font-weight:700}
+.site h1#heroName{margin-top:2.25rem;font-size:clamp(3.5rem,12vw,6.5rem);line-height:.95;letter-spacing:-.04em}
 .site h1 .ch{display:inline-block;will-change:transform}
 .role{margin:0;font-size:1.25rem;font-weight:500}
 .intro{max-width:34rem;margin:.5rem 0 0;color:var(--muted)}
 .sitenav{margin-top:1.75rem}
 .sitenav--top{margin-top:0;margin-bottom:1.5rem}
 .sitenav [aria-current="page"]{color:var(--ink);font-weight:700}
-.sitenav ul{display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;margin:0;padding:0;list-style:none}
+.sitenav ul{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1.25rem;margin:0;padding:0;list-style:none}
 .sitenav button{border:0;background:none;padding:0;cursor:pointer;font-size:1rem;color:var(--green);
   text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
-.sitenav button:hover{text-decoration-color:var(--gold);text-decoration-thickness:2px}
+.sitenav button:hover{text-decoration-thickness:2px}
 .site h2.page-title{font-size:clamp(2rem,6vw,2.6rem);letter-spacing:-.02em;line-height:1.1;margin:0 0 .25rem}
 .entries{margin:1.75rem 0 0;padding:0;list-style:none;border-top:1px solid var(--rule)}
 .entries>li{border-bottom:1px solid var(--rule)}
@@ -80,7 +83,54 @@ button{font:inherit;color:inherit}
 .skills dt{font-weight:700}.skills dd{margin:0}
 .sitefoot{margin-top:3.5rem;padding-top:1.25rem;border-top:1px solid var(--rule)}
 .sitefoot ul{display:flex;gap:1.25rem;list-style:none;margin:0;padding:0}
-@media (max-width:30rem){.skills{grid-template-columns:1fr;gap:.125rem}.skills dd{margin-bottom:.75rem}}
+
+/* ---- the one accent: the button the page wants pressed ---- */
+.btn{display:inline-block;padding:.7rem 1.25rem;border-radius:.375rem;background:var(--accent);color:var(--on-accent);
+  font-weight:700;text-decoration:none;transition:background-color .15s ease}
+.btn:hover{background:var(--accent-hover);text-decoration:none}
+.sitenav .btn{border:0;padding:.7rem 1.25rem;background:var(--accent);color:var(--on-accent);text-decoration:none}
+.sitenav .btn:hover{background:var(--accent-hover);text-decoration:none}
+.actions{margin:2rem 0 0}
+
+/* ---- home: oscilloscope. The trace is the bits of the name on a CAN bus. ---- */
+.scope{--scope-bg:#0f2a1c;--scope-ink:#ebe3d4;--scope-low:#6fb38f;--scope-grid:rgba(235,227,212,.09);margin:0}
+.scope-panel{background:var(--scope-bg);color:var(--scope-ink)}
+@media (prefers-color-scheme: dark){
+  .scope{--scope-bg:#08170f}
+  .scope-panel{outline:1px solid var(--rule)}
+}
+.scope-screen{position:relative;height:clamp(10rem,24vw,16rem);
+  background-image:linear-gradient(var(--scope-grid) 1px,transparent 1px),linear-gradient(90deg,var(--scope-grid) 1px,transparent 1px);
+  background-size:12.5% 25%}
+.scope-screen svg,.scope-screen img{position:absolute;inset:0;width:100%;height:100%}
+.scope-screen img{object-fit:cover}
+.trace{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:butt}
+.trace-high{stroke:var(--scope-ink)}
+.trace-low{stroke:var(--scope-low)}
+.band{fill:var(--scope-ink);opacity:0;transition:opacity .2s ease}
+.band.on{opacity:.11}
+.bytes{display:grid;grid-template-columns:repeat(4,1fr);margin:0;padding:0;list-style:none}
+.byte{display:flex;flex-direction:column;gap:.125rem;width:100%;margin:0;padding:.75rem .5rem .875rem 1rem;border:0;
+  border-left:1px solid rgba(235,227,212,.18);background:transparent;color:inherit;font:inherit;text-align:left;
+  cursor:pointer;transition:background-color .15s ease}
+.byte:hover,.byte[aria-pressed="true"]{background:rgba(235,227,212,.1)}
+.byte:focus-visible{outline:2px solid var(--scope-ink);outline-offset:-3px}
+.glyph{font-size:2.25rem;line-height:1.1;font-weight:700}
+.bin{font-size:.8125rem;letter-spacing:.08em;font-variant-numeric:tabular-nums;color:rgba(235,227,212,.72)}
+.scope figcaption{margin:.75rem 0 0;max-width:var(--measure);font-size:.9375rem;color:var(--muted)}
+.hint{display:none}
+.js .hint{display:inline}
+/* The letters wait for the sweep. If scripts never run, a CSS timer shows them anyway. */
+.js .byte{opacity:0;animation:byte-failsafe 0s 3s forwards}
+@keyframes byte-failsafe{to{opacity:1}}
+
+@media (max-width:30rem){
+  .skills{grid-template-columns:1fr;gap:.125rem}.skills dd{margin-bottom:.75rem}
+  .byte{padding:.625rem .25rem .75rem .625rem}
+  .glyph{font-size:1.75rem}
+  .bin{font-size:.6875rem;letter-spacing:.04em}
+  .trace{stroke-width:2.5}
+}
 
 /* ticker */
 .ticker{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow:hidden;white-space:nowrap;
@@ -91,13 +141,15 @@ button{font:inherit;color:inherit}
 .ticker b{color:var(--green);font-weight:700}
 @keyframes tick{to{transform:translateX(-50%)}}
 
-footer.page{max-width:var(--measure);margin:0 auto;padding:2rem 1.25rem 3.5rem;color:var(--muted);font-size:.92rem}
+footer.page{max-width:var(--wide);margin:0 auto;padding:2rem 1.25rem 3.5rem;color:var(--muted);font-size:.92rem}
 footer.page p{margin:.3rem 0}
 footer.page a{color:var(--green)}
 
 @media (prefers-reduced-motion:reduce){
   .ticker-track{animation:none}
   .chev{transition:none}
+  .js .byte{opacity:1;animation:none}
+  .band,.byte,.btn{transition:none}
 }
 </style>
 </head>
@@ -108,20 +160,26 @@ footer.page a{color:var(--green)}
   <div class="site">
     <!-- HOME -->
     <section id="panel-home" data-panel="home">
-      <div class="banner-wrap" id="bannerWrap">
-        <img class="banner" id="bannerImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDI0MCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iMjQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNBTkggYW5kIENBTkwgZGlmZmVyZW50aWFsIHNpZ25hbCB0cmFjZXMsIGRyYXduIGFzIHR3byBsaW5lcyB0aGF0IHNwbGl0IGFwYXJ0IGFuZCByZWpvaW4iPgogIDxzdHlsZT4KICAgIC5ncmlkIHBhdGggeyBzdHJva2U6ICNjZmM0YWM7IHN0cm9rZS13aWR0aDogMTsgZmlsbDogbm9uZTsgfQogICAgLm1pZCB7IHN0cm9rZTogI2IzYTY4Yjsgc3Ryb2tlLXdpZHRoOiAxLjU7IHN0cm9rZS1kYXNoYXJyYXk6IDQgODsgZmlsbDogbm9uZTsgfQogICAgLmgsIC5sIHsgZmlsbDogbm9uZTsgc3Ryb2tlLXdpZHRoOiA1OyBzdHJva2UtbGluZWpvaW46IHJvdW5kOyBzdHJva2UtbGluZWNhcDogcm91bmQ7IH0KICAgIC5oIHsgc3Ryb2tlOiAjMWY1ZTQ2OyB9CiAgICAubCB7IHN0cm9rZTogIzFkMmEyNDsgfQogICAgQG1lZGlhIChwcmVmZXJzLXJlZHVjZWQtbW90aW9uOiBuby1wcmVmZXJlbmNlKSB7CiAgICAgIC5oLCAubCB7IHN0cm9rZS1kYXNoYXJyYXk6IDE7IGFuaW1hdGlvbjogZHJhdyAyLjJzIGN1YmljLWJlemllciguMywuNiwuMiwxKSBib3RoOyB9CiAgICAgIC5sIHsgYW5pbWF0aW9uLWRlbGF5OiAuMThzOyB9CiAgICB9CiAgICBAa2V5ZnJhbWVzIGRyYXcgeyBmcm9tIHsgc3Ryb2tlLWRhc2hvZmZzZXQ6IDE7IH0gdG8geyBzdHJva2UtZGFzaG9mZnNldDogMDsgfSB9CiAgPC9zdHlsZT4KICA8cmVjdCB3aWR0aD0iMTIwMCIgaGVpZ2h0PSIyNDAiIGZpbGw9IiNlMGQ2YzEiIC8+CiAgPGcgY2xhc3M9ImdyaWQiPjxwYXRoIGQ9Ik0wIDBWMjQwIiAvPjxwYXRoIGQ9Ik02MCAwVjI0MCIgLz48cGF0aCBkPSJNMTIwIDBWMjQwIiAvPjxwYXRoIGQ9Ik0xODAgMFYyNDAiIC8+PHBhdGggZD0iTTI0MCAwVjI0MCIgLz48cGF0aCBkPSJNMzAwIDBWMjQwIiAvPjxwYXRoIGQ9Ik0zNjAgMFYyNDAiIC8+PHBhdGggZD0iTTQyMCAwVjI0MCIgLz48cGF0aCBkPSJNNDgwIDBWMjQwIiAvPjxwYXRoIGQ9Ik01NDAgMFYyNDAiIC8+PHBhdGggZD0iTTYwMCAwVjI0MCIgLz48cGF0aCBkPSJNNjYwIDBWMjQwIiAvPjxwYXRoIGQ9Ik03MjAgMFYyNDAiIC8+PHBhdGggZD0iTTc4MCAwVjI0MCIgLz48cGF0aCBkPSJNODQwIDBWMjQwIiAvPjxwYXRoIGQ9Ik05MDAgMFYyNDAiIC8+PHBhdGggZD0iTTk2MCAwVjI0MCIgLz48cGF0aCBkPSJNMTAyMCAwVjI0MCIgLz48cGF0aCBkPSJNMTA4MCAwVjI0MCIgLz48cGF0aCBkPSJNMTE0MCAwVjI0MCIgLz48cGF0aCBkPSJNMTIwMCAwVjI0MCIgLz48cGF0aCBkPSJNMCAwSDEyMDAiIC8+PHBhdGggZD0iTTAgNjBIMTIwMCIgLz48cGF0aCBkPSJNMCAxMjBIMTIwMCIgLz48cGF0aCBkPSJNMCAxODBIMTIwMCIgLz48cGF0aCBkPSJNMCAyNDBIMTIwMCIgLz48L2c+CiAgPHBhdGggY2xhc3M9Im1pZCIgZD0iTTAgMTIwSDEyMDAiIC8+CiAgPHBhdGggY2xhc3M9ImwiIHBhdGhMZW5ndGg9IjEiIGQ9Ik0wIDEyNCBMNzYuMCAxMjQgTDg0LjAgMTc0IEwxMTYuMCAxNzQgTDEyNC4wIDEyNCBMMTk2LjAgMTI0IEwyMDQuMCAxNzQgTDIzNi4wIDE3NCBMMjQ0LjAgMTI0IEwyNzYuMCAxMjQgTDI4NC4wIDE3NCBMMzU2LjAgMTc0IEwzNjQuMCAxMjQgTDM5Ni4wIDEyNCBMNDA0LjAgMTc0IEw0MzYuMCAxNzQgTDQ0NC4wIDEyNCBMNTU2LjAgMTI0IEw1NjQuMCAxNzQgTDY3Ni4wIDE3NCBMNjg0LjAgMTI0IEw3MTYuMCAxMjQgTDcyNC4wIDE3NCBMNzU2LjAgMTc0IEw3NjQuMCAxMjQgTDgzNi4wIDEyNCBMODQ0LjAgMTc0IEw4NzYuMCAxNzQgTDg4NC4wIDEyNCBMMTAzNi4wIDEyNCBMMTA0NC4wIDE3NCBMMTExNi4wIDE3NCBMMTEyNC4wIDEyNCBMMTIwMCAxMjQiIC8+CiAgPHBhdGggY2xhc3M9ImgiIHBhdGhMZW5ndGg9IjEiIGQ9Ik0wIDExNiBMNzYuMCAxMTYgTDg0LjAgNjYgTDExNi4wIDY2IEwxMjQuMCAxMTYgTDE5Ni4wIDExNiBMMjA0LjAgNjYgTDIzNi4wIDY2IEwyNDQuMCAxMTYgTDI3Ni4wIDExNiBMMjg0LjAgNjYgTDM1Ni4wIDY2IEwzNjQuMCAxMTYgTDM5Ni4wIDExNiBMNDA0LjAgNjYgTDQzNi4wIDY2IEw0NDQuMCAxMTYgTDU1Ni4wIDExNiBMNTY0LjAgNjYgTDY3Ni4wIDY2IEw2ODQuMCAxMTYgTDcxNi4wIDExNiBMNzI0LjAgNjYgTDc1Ni4wIDY2IEw3NjQuMCAxMTYgTDgzNi4wIDExNiBMODQ0LjAgNjYgTDg3Ni4wIDY2IEw4ODQuMCAxMTYgTDEwMzYuMCAxMTYgTDEwNDQuMCA2NiBMMTExNi4wIDY2IEwxMTI0LjAgMTE2IEwxMjAwIDExNiIgLz4KPC9zdmc+Cg==" width="1200" height="240" alt="Two signal traces, CANH and CANL, splitting apart and rejoining like a CAN bus waveform">
-        <svg class="trace-svg" viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
-          <path id="tracePath" d="M0 116 L76 116 L84 66 L116 66 L124 116 L196 116 L204 66 L236 66 L244 116 L276 116 L284 66 L356 66 L364 116 L396 116 L404 66 L436 66 L444 116 L556 116 L564 66 L676 66 L684 116 L716 116 L724 66 L756 66 L764 116 L836 116 L844 66 L876 66 L884 116 L1036 116 L1044 66 L1116 66 L1124 116 L1200 116" fill="none" stroke="none"/>
-          <circle id="traceDot" r="8" fill="#b88a1e"/>
-        </svg>
-        <span class="sig">CANH · CANL · differential pair</span>
-      </div>
+      <figure class="scope">
+        <div class="scope-panel">
+          <div class="scope-screen" id="scope">
+            <noscript><img src="banner.svg" width="1200" height="300" alt=""></noscript>
+          </div>
+          <ul class="bytes">
+            <li><button type="button" class="byte" data-bits="01001010" aria-pressed="false"><span class="glyph">J</span><span class="bin">01001010</span></button></li>
+            <li><button type="button" class="byte" data-bits="01101111" aria-pressed="false"><span class="glyph">o</span><span class="bin">01101111</span></button></li>
+            <li><button type="button" class="byte" data-bits="01100101" aria-pressed="false"><span class="glyph">e</span><span class="bin">01100101</span></button></li>
+            <li><button type="button" class="byte" data-bits="01111001" aria-pressed="false"><span class="glyph">y</span><span class="bin">01111001</span></button></li>
+          </ul>
+        </div>
+        <figcaption>My name as ASCII bytes on a CAN bus. <span class="hint">Select a letter to find its byte.</span></figcaption>
+      </figure>
       <h1 id="heroName" aria-label="Joey">Joey</h1>
       <p class="role" data-hero>Computer Engineering at the University of Waterloo</p>
       <p class="intro" data-hero>I&rsquo;m interested in embedded systems, firmware, and hardware acceleration.</p>
       <nav class="sitenav" aria-label="Site">
         <ul>
-          <li><button class="magnetic" type="button" data-goto="projects">projects</button></li>
+          <li><button class="magnetic btn" type="button" data-goto="projects">See projects</button></li>
           <li><button class="magnetic" type="button" data-goto="experience">experience</button></li>
           <li><button class="magnetic" type="button" data-goto="about">about</button></li>
         </ul>
@@ -195,6 +253,7 @@ footer.page a{color:var(--green)}
           </div></div>
         </li>
       </ul>
+      <p class="actions"><a class="btn" href="https://github.com/Joeysuh">See the code on GitHub</a></p>
     </section>
 
     <!-- EXPERIENCE -->
@@ -265,12 +324,11 @@ footer.page a{color:var(--green)}
 </div>
 
 <footer class="page">
-  <p>Joey — Computer Engineering, University of Waterloo.</p>
+  <p>Joey. Computer Engineering, University of Waterloo.</p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script>
 (function(){
@@ -294,6 +352,101 @@ footer.page a{color:var(--green)}
     s.className = "ch"; s.setAttribute("aria-hidden","true"); s.textContent = ch;
     hero.appendChild(s);
   });
+
+  /* ---------- home scope: the ASCII bits of the name as a CAN differential pair ---------- */
+  /* 1 = the two lines sit together (recessive), 0 = they split apart (dominant). */
+  function initScope(){
+    var screen = document.getElementById("scope");
+    var byteEls = Array.prototype.slice.call(document.querySelectorAll(".byte"));
+    if (!screen || !byteEls.length) return;
+
+    var NS = "http://www.w3.org/2000/svg";
+    var bits = [];
+    byteEls.forEach(function(el){
+      el.getAttribute("data-bits").split("").forEach(function(b){ bits.push(Number(b)); });
+    });
+    var n = bits.length;
+
+    function make(tag, attrs){
+      var el = document.createElementNS(NS, tag);
+      for (var k in attrs) el.setAttribute(k, attrs[k]);
+      return el;
+    }
+    var svg = make("svg", {"aria-hidden": "true", focusable: "false"});
+    var bands = byteEls.map(function(){ return make("rect", {"class": "band"}); });
+    var low = make("path", {"class": "trace trace-low", pathLength: "1"});
+    var high = make("path", {"class": "trace trace-high", pathLength: "1"});
+    bands.forEach(function(b){ svg.appendChild(b); });
+    svg.appendChild(low); svg.appendChild(high);
+    while (screen.firstChild) screen.removeChild(screen.firstChild);
+    screen.appendChild(svg);
+
+    function layout(){
+      var W = screen.clientWidth, H = screen.clientHeight;
+      if (!W || !H) return;                       /* panel hidden: redo when shown */
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      var w = W / n, edge = Math.min(w * 0.22, 8), mid = H / 2;
+      var recessive = H * 0.03, dominant = H * 0.24;
+      function level(bit, isHigh){ return mid + (isHigh ? -1 : 1) * (bit ? recessive : dominant); }
+      function trace(isHigh){
+        var d = "M0 " + level(bits[0], isHigh);
+        bits.forEach(function(bit, i){
+          var y = level(bit, isHigh);
+          d += " L" + (i * w + edge).toFixed(1) + " " + y + " L" + ((i + 1) * w - edge).toFixed(1) + " " + y;
+        });
+        return d + " L" + W + " " + level(bits[n - 1], isHigh);
+      }
+      high.setAttribute("d", trace(true));
+      low.setAttribute("d", trace(false));
+      var bw = W / byteEls.length;
+      bands.forEach(function(band, i){
+        band.setAttribute("x", (i * bw).toFixed(1)); band.setAttribute("y", 0);
+        band.setAttribute("width", bw.toFixed(1)); band.setAttribute("height", H);
+      });
+    }
+
+    /* selecting a letter lights up its byte on the trace */
+    var state = byteEls.map(function(){ return {hover: false, focus: false}; });
+    function refresh(i){
+      var pressed = byteEls[i].getAttribute("aria-pressed") === "true";
+      bands[i].classList.toggle("on", state[i].hover || state[i].focus || pressed);
+    }
+    byteEls.forEach(function(el, i){
+      el.addEventListener("pointerenter", function(){ state[i].hover = true; refresh(i); });
+      el.addEventListener("pointerleave", function(){ state[i].hover = false; refresh(i); });
+      el.addEventListener("focus", function(){ state[i].focus = true; refresh(i); });
+      el.addEventListener("blur", function(){ state[i].focus = false; refresh(i); });
+      el.addEventListener("click", function(){
+        el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true"));
+        refresh(i);
+      });
+    });
+
+    layout();
+    if (window.ResizeObserver) new ResizeObserver(layout).observe(screen);
+    else window.addEventListener("resize", layout);
+
+    if (!(hasGsap && motionOn)) return;
+
+    /* One entrance: the trace sweeps left to right and each letter appears as the
+       sweep reaches its byte. Path length is normalised to 1 (pathLength attribute),
+       so a dash of 1 with an offset running 1 to 0 draws the path. The offset is set
+       as an attribute from a proxy value, because GSAP's CSS plugin snaps px lengths
+       like stroke-dashoffset to whole numbers and the sweep becomes a single jump. */
+    var sweep = 1.8, tl = gsap.timeline();
+    function draw(path, at){
+      var p = {value: 0};
+      path.setAttribute("stroke-dasharray", "1");
+      path.setAttribute("stroke-dashoffset", "1");
+      tl.to(p, {value: 1, duration: sweep, ease: "none",
+        onUpdate: function(){ path.setAttribute("stroke-dashoffset", String(1 - p.value)); },
+        onComplete: function(){ path.removeAttribute("stroke-dasharray"); path.removeAttribute("stroke-dashoffset"); }}, at);
+    }
+    draw(high, .15); draw(low, .25);
+    byteEls.forEach(function(el, i){
+      tl.fromTo(el, {opacity: 0}, {opacity: 1, duration: .4, ease: "power1.out"}, .2 + i * sweep / byteEls.length);
+    });
+  }
 
   /* ---------- project expand (smooth, not native snap) ---------- */
   document.querySelectorAll(".proj").forEach(function(item){
@@ -339,7 +492,6 @@ footer.page a{color:var(--green)}
   function initMotion(){
     if (!hasGsap) return;
     gsap.registerPlugin(ScrollTrigger);
-    if (window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);
 
     /* Lenis smooth scroll, synced to ScrollTrigger */
     if (typeof window.Lenis !== "undefined" && !lenis) {
@@ -350,25 +502,11 @@ footer.page a{color:var(--green)}
     }
     if (lenis) lenis.start();
 
-    /* intro timeline: banner wipe + hero letters */
+    /* intro timeline: hero letters, then the text and nav (the scope sweeps on its own) */
     introTl = gsap.timeline({defaults: {ease: "power3.out"}});
-    introTl.fromTo("#bannerWrap", {clipPath: "inset(0 100% 0 0)"}, {clipPath: "inset(0 0% 0 0)", duration: 1.1, ease: "power3.inOut"}, 0)
-      .fromTo("#bannerImg", {scale: 1.06}, {scale: 1, duration: 1.4}, 0)
-      .fromTo("#heroName .ch", {yPercent: 110, rotate: 4}, {yPercent: 0, rotate: 0, duration: .7, stagger: .06}, .35)
+    introTl.fromTo("#heroName .ch", {yPercent: 110, rotate: 4}, {yPercent: 0, rotate: 0, duration: .7, stagger: .06}, .35)
       .fromTo("[data-hero]", {opacity: 0, y: 16}, {opacity: 1, y: 0, duration: .6, stagger: .12}, .7)
       .fromTo(".sitenav li", {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .45, stagger: .07}, .95);
-
-    /* gold pulse travelling the CANH trace (same path as the banner art) */
-    if (window.MotionPathPlugin) {
-      var dot = document.getElementById("traceDot");
-      gsap.set(dot, {opacity: 1});
-      gsap.to(dot, {duration: 6, repeat: -1, ease: "none",
-        motionPath: {path: "#tracePath", align: "#tracePath", alignOrigin: [.5, .5]}});
-    }
-
-    /* banner parallax */
-    triggers.push(gsap.to("#bannerImg", {yPercent: 12, ease: "none",
-      scrollTrigger: {trigger: "#bannerWrap", start: "top bottom", end: "bottom top", scrub: true}}));
 
     /* scroll progress */
     triggers.push(gsap.to("#progressBar", {scaleX: 1, ease: "none",
@@ -397,6 +535,7 @@ footer.page a{color:var(--green)}
   }
 
   /* go */
+  initScope();
   if (motionOn) { initMotion(); }
 })();
 </script>
