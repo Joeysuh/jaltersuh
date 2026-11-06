@@ -1,0 +1,12 @@
+name = "joey-chat"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+# Per-IP limit: 8 questions per minute.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 8
+  period = 60

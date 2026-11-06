@@ -5,83 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Joey</title>
 <meta name="description" content="Joey. Firmware, real-time systems and hardware accelerators. Computer Engineering at Waterloo, now at Tesla.">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#1e1e1e">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#3f6db1">
 <meta property="og:title" content="Joey">
 <meta property="og:description" content="Firmware, real-time systems and hardware accelerators.">
+<meta property="og:image" content="img/hero-wide.jpg">
 <link rel="icon" href="data:,">
-<script>
-  (function () {
-    var t = "system";
-    try { t = localStorage.getItem("theme") || "system"; } catch (e) {}
-    var dark = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme-choice", t);
-  })();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
 
-<div class="status" aria-label="Status">
-  <span>Waterloo, ON</span>
-  <span><time id="clock">--:--:--</time></span>
-  <span><i class="dot" aria-hidden="true"></i>Tesla</span>
-</div>
+<header class="hero">
+  <picture class="paint" aria-hidden="true">
+    <source media="(orientation: portrait)" srcset="img/hero-tall.jpg">
+    <img src="img/hero-wide.jpg" width="1920" height="1080" alt="">
+  </picture>
 
-<header class="top">
-  <a class="mark" href="#main" aria-label="Joey, home">J</a>
-  <nav aria-label="Primary">
-    <ul>
-      <li><a href="#work">Work</a></li>
-      <li><a href="#experience">Experience</a></li>
-      <li><a href="#lab">Lab</a></li>
-    </ul>
-  </nav>
-  <button class="kbar" type="button" data-palette aria-haspopup="dialog" aria-label="Search or ask">
-    <span>Ask</span><kbd class="hide-sm" data-mod>⌘K</kbd>
-  </button>
+  <div class="bar">
+    <span>Waterloo, ON</span>
+    <span><time id="clock">--:--</time></span>
+    <span><i class="dot" aria-hidden="true"></i>Tesla</span>
+  </div>
+
+  <div class="hero-in">
+    <div class="intro">
+      <h1>Joey</h1>
+      <p class="lede">Firmware, real-time systems and hardware accelerators.</p>
+      <ul class="socials" data-socials aria-label="Elsewhere"></ul>
+    </div>
+
+    <section class="chat" aria-label="Ask about my work">
+      <div class="log" aria-live="polite"></div>
+      <div class="chips"></div>
+      <form class="ask" autocomplete="off">
+        <input id="q" name="q" type="text" maxlength="400" placeholder="Ask me about my work" aria-label="Ask me about my work">
+        <button class="send" type="submit" aria-label="Send">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p class="note" data-note>Answers about my work only.</p>
+    </section>
+  </div>
 </header>
 
-<main id="main">
-  <section class="hero">
-    <h1>Joey</h1>
-    <p class="lede">Firmware, real-time systems and hardware accelerators.</p>
-    <p class="sub">Computer Engineering, Waterloo &rsquo;27</p>
-    <ul class="socials" data-socials aria-label="Elsewhere"></ul>
-  </section>
-
-  <section class="row" id="work" aria-labelledby="work-h">
+<main class="page">
+  <section class="row" aria-labelledby="work-h">
     <h2 class="label" id="work-h">Work</h2>
-    <ol class="list" data-previews>
-      <li class="item" id="w-rtos" data-preview="rtos">
+    <ol class="list">
+      <li class="item">
         <button class="item-head" type="button" aria-expanded="false"><span class="t">Bare-metal RTOS</span><span class="m">STM32</span></button>
-        <div class="item-body"><div class="item-in"><p>EDF scheduler and a heap allocator with corruption checks. No vendor OS.</p></div></div>
+        <div class="item-body"><p>EDF scheduler and a heap allocator with corruption checks. No vendor OS.</p></div>
       </li>
-      <li class="item" id="w-alive" data-preview="alive">
+      <li class="item">
         <button class="item-head" type="button" aria-expanded="false"><span class="t">ALIVE</span><span class="m">Capstone</span></button>
-        <div class="item-body"><div class="item-in"><p>Biometric wearable driving an adaptive UE5 game. I built the sensing unit: STM32 + ESP32, pulse, IMU and skin response.</p></div></div>
+        <div class="item-body"><p>Biometric wearable driving an adaptive UE5 game. I built the sensing unit: STM32 + ESP32, pulse, IMU and skin response.</p></div>
       </li>
-      <li class="item" id="w-bitwave" data-preview="bitwave">
+      <li class="item">
         <button class="item-head" type="button" aria-expanded="false"><span class="t">BitWave accelerator</span><span class="m">RTL</span></button>
-        <div class="item-body"><div class="item-in"><p>Memory and integration for the BitWave paper. SRAM in SystemVerilog, verified with cocotb.</p></div></div>
+        <div class="item-body"><p>Memory and integration for the BitWave paper. SRAM in SystemVerilog, verified with cocotb.</p></div>
       </li>
-      <li class="item" id="w-dot" data-preview="dot">
+      <li class="item">
         <button class="item-head" type="button" aria-expanded="false"><span class="t">Multi-precision dot product</span><span class="m">RTL</span></button>
-        <div class="item-body"><div class="item-in"><p>16 lanes, FP16 down to MXFP8. Bit-exact against a Python model.</p></div></div>
+        <div class="item-body"><p>16 lanes, FP16 down to MXFP8. Bit-exact against a Python model.</p></div>
       </li>
-      <li class="item" id="w-fpga" data-preview="fpga">
+      <li class="item">
         <button class="item-head" type="button" aria-expanded="false"><span class="t">FPGA matrix-vector multiplier</span><span class="m">FPGA</span></button>
-        <div class="item-body"><div class="item-in"><p>Pipelined, eight parallel lanes.</p></div></div>
+        <div class="item-body"><p>Pipelined, eight parallel lanes.</p></div>
       </li>
     </ol>
   </section>
 
-  <section class="row" id="experience" aria-labelledby="exp-h">
+  <section class="row" aria-labelledby="exp-h">
     <h2 class="label" id="exp-h">Experience</h2>
     <ol class="list">
       <li class="exp"><span class="t">Tesla</span><span class="m">Now</span></li>
@@ -91,40 +88,8 @@
     </ol>
   </section>
 
-  <section class="row" id="lab" aria-labelledby="lab-h">
-    <h2 class="label" id="lab-h">Lab</h2>
-    <figure class="scope">
-      <div class="scope-screen" id="scope"><noscript><img src="banner.svg" width="1200" height="300" alt=""></noscript></div>
-      <ul class="bytes">
-        <li><button type="button" class="byte" data-bits="01001010" aria-pressed="false"><span class="glyph">J</span><span class="bin">01001010</span></button></li>
-        <li><button type="button" class="byte" data-bits="01101111" aria-pressed="false"><span class="glyph">o</span><span class="bin">01101111</span></button></li>
-        <li><button type="button" class="byte" data-bits="01100101" aria-pressed="false"><span class="glyph">e</span><span class="bin">01100101</span></button></li>
-        <li><button type="button" class="byte" data-bits="01111001" aria-pressed="false"><span class="glyph">y</span><span class="bin">01111001</span></button></li>
-      </ul>
-      <figcaption>My name on a CAN bus.</figcaption>
-    </figure>
-  </section>
+  <footer class="foot">&copy; 2026 Joey</footer>
 </main>
-
-<footer class="foot">
-  <span>&copy; 2026 Joey</span>
-  <div class="seg" role="radiogroup" aria-label="Theme">
-    <button type="button" role="radio" data-theme-set="light">Light</button>
-    <button type="button" role="radio" data-theme-set="dark">Dark</button>
-    <button type="button" role="radio" data-theme-set="system">Auto</button>
-  </div>
-</footer>
-
-<div class="preview" aria-hidden="true"><img alt="" width="480" height="480"></div>
-
-<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Search or ask" hidden>
-  <div class="palette-box">
-    <input id="pal-input" type="text" autocomplete="off" spellcheck="false" placeholder="Ask or jump to…" aria-label="Ask or jump to" aria-controls="pal-list">
-    <ul class="pal-list" id="pal-list" role="listbox" aria-label="Results"></ul>
-    <div class="pal-answer" aria-live="polite" hidden></div>
-    <p class="pal-hint"><span><kbd>↑</kbd><kbd>↓</kbd></span><span><kbd>↵</kbd></span><span><kbd>esc</kbd></span><span class="pal-note">Scripted answers</span></p>
-  </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>

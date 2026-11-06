@@ -1,13 +1,13 @@
 (function () {
   "use strict";
 
+  /* Set this to the deployed chat worker URL (see chat-worker/README.md).
+     While it's empty, the chat uses the scripted answers below. */
+  var CHAT_ENDPOINT = "";
+
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var motionOn = !reduceMotion;
   var hasGsap = typeof window.gsap !== "undefined";
-  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-  var root = document.documentElement;
-
-  if (!isMac) document.querySelectorAll("[data-mod]").forEach(function (k) { k.textContent = "Ctrl K"; });
 
   /* ------------------------------------------------------------------ socials
      Icons: GitHub from simple-icons (CC0); LinkedIn and X from Font Awesome
@@ -20,405 +20,175 @@
     { id: "x", label: "X", url: "https://x.com/6JoeySuh", box: "0 0 448 512",
       path: "M357.2 48L427.8 48 273.6 224.2 455 464 313 464 201.7 318.6 74.5 464 3.8 464 168.7 275.5-5.2 48 140.4 48 240.9 180.9 357.2 48zM332.4 421.8l39.1 0-252.4-333.8-42 0 255.3 333.8z" }
   ];
-  var liveSocials = SOCIALS.filter(function (s) { return s.url && s.path; });
-  var socialList = document.querySelector("[data-socials]");
-  liveSocials.forEach(function (s) {
+  var list = document.querySelector("[data-socials]");
+  SOCIALS.forEach(function (s) {
     var li = document.createElement("li");
-    li.innerHTML = '<a href="' + s.url + '" aria-label="' + s.label + '" title="' + s.label + '"' +
-      (s.url.indexOf("mailto:") === 0 ? "" : ' rel="me noopener"') + '><svg viewBox="' + s.box + '" aria-hidden="true"><path d="' + s.path + '"/></svg></a>';
-    if (socialList) socialList.appendChild(li);
+    li.innerHTML = '<a href="' + s.url + '" aria-label="' + s.label + '" title="' + s.label + '" rel="me noopener"><svg viewBox="' + s.box + '" aria-hidden="true"><path d="' + s.path + '"/></svg></a>';
+    list.appendChild(li);
   });
 
-  /* ---------------------------------------------------------- status strip */
+  /* ----------------------------------------------------------------- clock */
   var clock = document.getElementById("clock");
-  var fmt;
-  try {
-    fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-  } catch (e) { fmt = null; }
-  function tick() { if (clock && fmt) clock.textContent = fmt.format(new Date()); }
-  tick(); setInterval(tick, 1000);
-
-  var fpsOut = document.getElementById("fps");
-  if (fpsOut) {
-    var frames = 0, last = performance.now();
-    (function loop(now) {
-      frames++;
-      if (now - last >= 1000) { fpsOut.textContent = String(Math.round(frames * 1000 / (now - last))); frames = 0; last = now; }
-      requestAnimationFrame(loop);
-    })(last);
-  }
+  var fmt = null;
+  try { fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", minute: "2-digit", hour12: false }); } catch (e) {}
+  function tick() { if (fmt) clock.textContent = fmt.format(new Date()) + " ET"; }
+  tick(); setInterval(tick, 15000);
 
   /* --------------------------------------------------------- smooth scroll */
-  var lenis = null;
   if (motionOn && hasGsap && typeof window.Lenis !== "undefined") {
-    lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
     gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
     gsap.ticker.lagSmoothing(0);
   }
-  function scrollToEl(el) {
-    if (!el) return;
-    if (lenis) lenis.scrollTo(el, { offset: -72 });
-    else el.scrollIntoView({ behavior: motionOn ? "smooth" : "auto", block: "start" });
-  }
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    var id = a.getAttribute("href").slice(1);
-    var el = id ? document.getElementById(id) : null;
-    if (!el) return;
-    e.preventDefault();
-    scrollToEl(el);
-    if (id === "main") window.scrollTo(0, 0);
-  });
 
-  /* ----------------------------------------------------------------- theme */
-  var mq = window.matchMedia("(prefers-color-scheme: dark)");
-  function applyTheme(choice) {
-    var dark = choice === "dark" || (choice === "system" && mq.matches);
-    root.setAttribute("data-theme", dark ? "dark" : "light");
-    root.setAttribute("data-theme-choice", choice);
-    try { localStorage.setItem("theme", choice); } catch (e) {}
-    document.querySelectorAll("[data-theme-set]").forEach(function (b) {
-      b.setAttribute("aria-checked", String(b.getAttribute("data-theme-set") === choice));
-    });
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", dark ? "#1e1e1e" : "#f4f4f2");
-    swapPreviewTheme();
+  /* ----------------------------------------------- one entrance: paint settles */
+  if (motionOn && hasGsap) {
+    gsap.fromTo(".paint img", { scale: 1.08 }, { scale: 1, duration: 2.4, ease: "power2.out" });
+    gsap.fromTo(".intro > *, .chat", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.08, delay: 0.25 });
   }
-  function currentChoice() { return root.getAttribute("data-theme-choice") || "system"; }
-  mq.addEventListener && mq.addEventListener("change", function () { if (currentChoice() === "system") applyTheme("system"); });
-  document.querySelectorAll("[data-theme-set]").forEach(function (b) {
-    b.addEventListener("click", function () { applyTheme(b.getAttribute("data-theme-set")); });
-  });
 
   /* ------------------------------------------------------------- work list */
-  function setItem(item, open) {
+  document.querySelectorAll(".item").forEach(function (item) {
     var head = item.querySelector(".item-head");
     var body = item.querySelector(".item-body");
-    item.classList.toggle("open", open);
-    head.setAttribute("aria-expanded", String(open));
-    if (hasGsap && motionOn) gsap.to(body, { height: open ? "auto" : 0, duration: 0.4, ease: "power2.inOut", overwrite: true });
-    else body.style.height = open ? "auto" : "0px";
-  }
-  document.querySelectorAll(".item").forEach(function (item) {
-    item.querySelector(".item-head").addEventListener("click", function () { setItem(item, !item.classList.contains("open")); });
+    head.addEventListener("click", function () {
+      var open = !item.classList.contains("open");
+      item.classList.toggle("open", open);
+      head.setAttribute("aria-expanded", String(open));
+      if (hasGsap && motionOn) gsap.to(body, { height: open ? "auto" : 0, duration: 0.4, ease: "power2.inOut", overwrite: true });
+      else body.style.height = open ? "auto" : "0px";
+    });
   });
-
-  /* preview image follows the pointer (mouse and trackpad only) */
-  var preview = document.querySelector(".preview");
-  var previewImg = preview && preview.querySelector("img");
-  var currentPreview = null;
-  function previewSrc(name) { return "img/proj-" + name + "-" + (root.getAttribute("data-theme") === "dark" ? "dark" : "light") + ".png"; }
-  function swapPreviewTheme() { if (currentPreview && previewImg) previewImg.src = previewSrc(currentPreview); }
-  if (preview && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    var xTo, yTo;
-    if (hasGsap) {
-      xTo = gsap.quickTo(preview, "x", { duration: motionOn ? 0.45 : 0, ease: "power3" });
-      yTo = gsap.quickTo(preview, "y", { duration: motionOn ? 0.45 : 0, ease: "power3" });
-    }
-    var placed = false;
-    document.querySelectorAll("[data-preview]").forEach(function (li) {
-      var head = li.querySelector(".item-head");
-      head.addEventListener("pointerenter", function (e) {
-        currentPreview = li.getAttribute("data-preview");
-        previewImg.src = previewSrc(currentPreview);
-        if (!placed && hasGsap) { gsap.set(preview, { x: e.clientX + 140, y: e.clientY }); placed = true; }
-        preview.classList.add("on");
-      });
-      head.addEventListener("pointerleave", function () { preview.classList.remove("on"); });
-      head.addEventListener("pointermove", function (e) {
-        var x = e.clientX + 140, y = e.clientY;
-        if (xTo) { xTo(x); yTo(y); } else { preview.style.transform = "translate(" + (x - 104) + "px," + (y - 104) + "px)"; }
-      });
-    });
-  }
-
-  /* -------------------------------------------------- lab: CAN name decoder
-     1 = the two lines sit together (recessive), 0 = they split apart (dominant). */
-  (function initScope() {
-    var screen = document.getElementById("scope");
-    var byteEls = Array.prototype.slice.call(document.querySelectorAll(".byte"));
-    if (!screen || !byteEls.length) return;
-    var NS = "http://www.w3.org/2000/svg";
-    var bits = [];
-    byteEls.forEach(function (el) { el.getAttribute("data-bits").split("").forEach(function (b) { bits.push(Number(b)); }); });
-    var n = bits.length;
-    function make(tag, attrs) { var el = document.createElementNS(NS, tag); for (var k in attrs) el.setAttribute(k, attrs[k]); return el; }
-    var svg = make("svg", { "aria-hidden": "true", focusable: "false" });
-    var bands = byteEls.map(function () { return make("rect", { "class": "band" }); });
-    var low = make("path", { "class": "trace trace-low", pathLength: "1" });
-    var high = make("path", { "class": "trace trace-high", pathLength: "1" });
-    bands.forEach(function (b) { svg.appendChild(b); });
-    svg.appendChild(low); svg.appendChild(high);
-    while (screen.firstChild) screen.removeChild(screen.firstChild);
-    screen.appendChild(svg);
-
-    function layout() {
-      var W = screen.clientWidth, H = screen.clientHeight;
-      if (!W || !H) return;
-      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      var w = W / n, edge = Math.min(w * 0.22, 6), mid = H / 2, rec = H * 0.03, dom = H * 0.24;
-      function level(bit, hi) { return mid + (hi ? -1 : 1) * (bit ? rec : dom); }
-      function trace(hi) {
-        var d = "M0 " + level(bits[0], hi);
-        bits.forEach(function (bit, i) {
-          var y = level(bit, hi);
-          d += " L" + (i * w + edge).toFixed(1) + " " + y + " L" + ((i + 1) * w - edge).toFixed(1) + " " + y;
-        });
-        return d + " L" + W + " " + level(bits[n - 1], hi);
-      }
-      high.setAttribute("d", trace(true));
-      low.setAttribute("d", trace(false));
-      var bw = W / byteEls.length;
-      bands.forEach(function (band, i) {
-        band.setAttribute("x", (i * bw).toFixed(1)); band.setAttribute("y", 0);
-        band.setAttribute("width", bw.toFixed(1)); band.setAttribute("height", H);
-      });
-    }
-    var state = byteEls.map(function () { return { hover: false, focus: false }; });
-    function refresh(i) {
-      var pressed = byteEls[i].getAttribute("aria-pressed") === "true";
-      bands[i].classList.toggle("on", state[i].hover || state[i].focus || pressed);
-    }
-    byteEls.forEach(function (el, i) {
-      el.addEventListener("pointerenter", function () { state[i].hover = true; refresh(i); });
-      el.addEventListener("pointerleave", function () { state[i].hover = false; refresh(i); });
-      el.addEventListener("focus", function () { state[i].focus = true; refresh(i); });
-      el.addEventListener("blur", function () { state[i].focus = false; refresh(i); });
-      el.addEventListener("click", function () {
-        el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true"));
-        refresh(i);
-      });
-    });
-    layout();
-    if (window.ResizeObserver) new ResizeObserver(layout).observe(screen);
-
-    /* sweep once when the lab scrolls into view. The dash offset is set as an
-       attribute from a proxy because GSAP's CSS plugin rounds px lengths. */
-    if (!hasGsap || !motionOn || !window.IntersectionObserver) return;
-    [high, low].forEach(function (p) { p.setAttribute("stroke-dasharray", "1"); p.setAttribute("stroke-dashoffset", "1"); });
-    var io = new IntersectionObserver(function (entries) {
-      if (!entries[0].isIntersecting) return;
-      io.disconnect();
-      var tl = gsap.timeline();
-      [[high, 0], [low, 0.1]].forEach(function (pair) {
-        var path = pair[0], p = { v: 0 };
-        tl.to(p, { v: 1, duration: 1.4, ease: "none",
-          onUpdate: function () { path.setAttribute("stroke-dashoffset", String(1 - p.v)); },
-          onComplete: function () { path.removeAttribute("stroke-dasharray"); path.removeAttribute("stroke-dashoffset"); } }, pair[1]);
-      });
-    }, { threshold: 0.5 });
-    io.observe(screen);
-  })();
 
   /* ------------------------------------------------------- scripted answers
-     Matches a question against what's on this site. Nothing leaves the browser. */
-  function socialLinksHtml() {
-    if (!liveSocials.length) return "";
-    return "<ul>" + liveSocials.map(function (s) {
-      return '<li><a href="' + s.url + '"' + (s.url.indexOf("mailto:") === 0 ? "" : ' rel="noopener"') + ">" + s.label + "</a></li>";
-    }).join("") + "</ul>";
-  }
-  function openBtn(id, label) { return '<button type="button" data-open="' + id + '">' + label + "</button>"; }
-
+     Used when the AI endpoint isn't set or can't be reached. Plain text only. */
   var KB = [
-    { id: "hello", keys: ["hi", "hello", "hey", "yo", "sup"],
-      a: function () { return "<p>Hi! Ask me about my projects, my internships, Tesla, or what I'm into.</p>"; } },
-    { id: "who", keys: ["who", "about you", "yourself", "introduce", "joey", "background"],
-      a: function () { return "<p>I'm Joey, a Computer Engineering student at the University of Waterloo, graduating in 2027, and currently at Tesla. I like work close to the hardware: firmware, real-time systems and hardware acceleration.</p>"; } },
-    { id: "tesla", keys: ["tesla", "now", "currently", "current job", "right now", "these days"],
-      a: function () { return "<p>I'm at Tesla right now.</p>"; } },
-    { id: "school", keys: ["waterloo", "school", "university", "uni", "study", "degree", "graduate", "graduating", "major"],
-      a: function () { return "<p>Computer Engineering at the University of Waterloo, class of 2027.</p>"; } },
-    { id: "interests", keys: ["interested", "interests", "focus", "passion", "enjoy", "into"],
-      a: function () { return "<p>Embedded systems, firmware and hardware acceleration. I like knowing exactly what the hardware is doing, from a scheduler on an STM32 to an RTL datapath.</p>"; } },
-    { id: "projects", keys: ["projects", "project", "built", "build", "made", "portfolio", "work on", "working on"],
-      a: function () { return "<p>A bare-metal RTOS, ALIVE (a biometric wearable), RTL for the BitWave accelerator, a 16-lane multi-precision dot-product unit and a pipelined FPGA matrix-vector multiplier.</p>" + openBtn("work", "Go to selected work"); } },
-    { id: "rtos", keys: ["rtos", "scheduler", "edf", "earliest deadline", "kernel", "real-time", "realtime", "heap", "allocator", "bare-metal", "bare metal", "stm32"],
-      a: function () { return "<p>A real-time kernel on an STM32F401RE with no vendor OS. It schedules by earliest deadline first and has its own heap allocator with free-block merging and magic-number corruption checks.</p>" + openBtn("w-rtos", "Open the RTOS"); } },
-    { id: "alive", keys: ["alive", "capstone", "wearable", "biometric", "biometrics", "unreal", "ue5", "ppg", "pulse", "esp32", "sensor", "sensors", "imu"],
-      a: function () { return "<p>ALIVE is my capstone: a wearable that drives an adaptive Unreal Engine 5 game. I own the biometric acquisition unit, an STM32F401RE plus ESP32 reading pulse, motion and skin response sensors through a fourth-order Butterworth band-pass filter.</p>" + openBtn("w-alive", "Open ALIVE"); } },
-    { id: "bitwave", keys: ["bitwave", "accelerator", "sram", "cocotb", "ece 493", "ece493"],
-      a: function () { return "<p>A team implementation of the BitWave accelerator paper. I own the RTL interface, memory and integration, with SRAM modules verified against a Python golden model in cocotb.</p>" + openBtn("w-bitwave", "Open BitWave"); } },
-    { id: "dot", keys: ["dot product", "dot-product", "fp8", "fp16", "bf16", "tf32", "mxfp8", "precision", "floating point"],
-      a: function () { return "<p>A 16-lane dot-product unit covering FP16, BF16, TF32, FP8, MXFP8 and UINT8, checked bit for bit against a Python replica.</p>" + openBtn("w-dot", "Open the dot-product unit"); } },
-    { id: "fpga", keys: ["fpga", "matrix", "vector", "multiplier", "pipelined"],
-      a: function () { return "<p>A pipelined matrix-vector multiplier with eight parallel lanes in SystemVerilog.</p>" + openBtn("w-fpga", "Open the FPGA project"); } },
-    { id: "experience", keys: ["experience", "internship", "internships", "intern", "interned", "job", "jobs", "worked", "companies", "co-op", "coop"],
-      a: function () { return "<ul><li><b>Tesla:</b> current</li><li><b>Harbinger Motors:</b> OTA firmware validation, DoCAN and DoIP diagnostics, MACsec, TCU</li><li><b>Ford:</b> multi-threaded ECU simulation, deadlock debugging, CAN and DoIP</li><li><b>Waterloo FSAE:</b> HIL and SIL bring-up, BMU firmware</li></ul>" + openBtn("experience", "Go to experience"); } },
-    { id: "harbinger", keys: ["harbinger", "ota", "over-the-air", "over the air", "macsec", "tcu", "doip", "docan"],
-      a: function () { return "<p>At Harbinger Motors I validated over-the-air firmware updates and worked on DoCAN and DoIP diagnostics, MACsec and the TCU.</p>"; } },
-    { id: "ford", keys: ["ford", "ecu", "simulation", "deadlock", "deadlocks", "multithreaded", "multi-threaded"],
-      a: function () { return "<p>At Ford I worked on a multi-threaded ECU simulation, with plenty of deadlock debugging, plus CAN and DoIP diagnostics.</p>"; } },
-    { id: "fsae", keys: ["fsae", "formula", "racing", "race car", "bmu", "battery", "hil", "sil"],
-      a: function () { return "<p>On Waterloo FSAE I work on hardware-in-the-loop and software-in-the-loop test setups and battery management unit firmware.</p>"; } },
-    { id: "skills", keys: ["skills", "languages", "language", "stack", "tools", "c++", "python", "systemverilog", "verilog", "rtl"],
-      a: function () { return "<ul><li><b>Languages:</b> C, C++, Python, SystemVerilog</li><li><b>Embedded:</b> STM32, ESP32, RTOS, bare-metal</li><li><b>Automotive:</b> CAN, DoCAN, DoIP, MACsec</li><li><b>Hardware:</b> RTL, FPGA, cocotb</li></ul>"; } },
-    { id: "can", keys: ["can bus", "canbus", "automotive", "diagnostics", "decoder"],
-      a: function () { return "<p>CAN keeps coming up in my work. The lab section has my name sent as ASCII on a CAN bus.</p>" + openBtn("lab", "Go to the lab"); } },
-    { id: "contact", keys: ["contact", "reach", "email", "mail", "linkedin", "twitter", "github", "socials", "social", "hire", "hiring", "resume", "cv", "connect", "dm"],
-      a: function () { var l = socialLinksHtml(); return l ? "<p>Find me here:</p>" + l : "<p>Links coming soon.</p>"; } },
-    { id: "site", keys: ["this site", "website", "site", "chatbot", "bot", "ai", "built this"],
-      a: function () { return "<p>Hand-written HTML, CSS and JavaScript on GitHub Pages, with GSAP and Lenis for motion. These answers are scripted from what's on the site, so nothing you type leaves your browser.</p>"; } },
-    { id: "thanks", keys: ["thanks", "thank you", "ty", "cool", "nice"],
-      a: function () { return "<p>Thanks for stopping by!</p>"; } }
+    { keys: ["hi", "hello", "hey", "yo"], a: "Hi! Ask me about my projects, Tesla, internships or skills.", weak: true },
+    { keys: ["who", "about you", "yourself", "joey", "introduce", "background"], a: "I'm Joey, a Computer Engineering student at Waterloo (class of 2027), currently at Tesla. I work close to the hardware: firmware, real-time systems and hardware acceleration." },
+    { keys: ["tesla", "now", "currently", "right now"], a: "I'm at Tesla right now." },
+    { keys: ["waterloo", "school", "university", "degree", "graduate", "graduating", "major", "study"], a: "Computer Engineering at the University of Waterloo, class of 2027." },
+    { keys: ["projects", "project", "built", "build", "building", "made", "portfolio", "working on", "work on"], a: "A bare-metal RTOS, ALIVE (a biometric wearable), RTL for the BitWave accelerator, a 16-lane multi-precision dot-product unit and a pipelined FPGA matrix-vector multiplier." },
+    { keys: ["rtos", "scheduler", "edf", "kernel", "real-time", "heap", "allocator", "bare-metal", "bare metal", "stm32"], a: "My RTOS runs on an STM32F401RE with no vendor OS. It schedules by earliest deadline first and has its own heap allocator with corruption checks." },
+    { keys: ["alive", "capstone", "wearable", "biometric", "unreal", "ue5", "esp32", "sensor", "sensors"], a: "ALIVE is my capstone: a wearable that drives an adaptive Unreal Engine 5 game. I built the sensing unit, an STM32 and ESP32 reading pulse, motion and skin response." },
+    { keys: ["bitwave", "accelerator", "sram", "cocotb", "ece 493"], a: "BitWave is a team build of an accelerator paper. I own memory and integration: SRAM in SystemVerilog, verified with cocotb against a Python model." },
+    { keys: ["dot product", "fp8", "fp16", "bf16", "mxfp8", "precision"], a: "A 16-lane dot-product unit from FP16 down to MXFP8 and UINT8, bit-exact against a Python replica." },
+    { keys: ["fpga", "matrix", "vector", "multiplier"], a: "A pipelined matrix-vector multiplier with eight parallel lanes in SystemVerilog." },
+    { keys: ["experience", "internship", "internships", "intern", "interned", "worked", "jobs", "companies", "co-op"], a: "Tesla now. Before that, Harbinger Motors (OTA firmware, diagnostics, MACsec) and Ford (ECU simulation, CAN and DoIP). I also do BMU firmware for Waterloo FSAE." },
+    { keys: ["harbinger", "ota", "macsec", "tcu", "doip", "docan"], a: "At Harbinger Motors I validated over-the-air firmware updates and worked on DoCAN and DoIP diagnostics, MACsec and the TCU." },
+    { keys: ["ford", "ecu", "deadlock", "simulation"], a: "At Ford I worked on a multi-threaded ECU simulation, lots of deadlock debugging, plus CAN and DoIP diagnostics." },
+    { keys: ["fsae", "formula", "racing", "bmu", "battery", "hil", "sil"], a: "On Waterloo FSAE I do hardware- and software-in-the-loop bring-up and battery management unit firmware." },
+    { keys: ["skills", "languages", "language", "stack", "tools", "c++", "python", "systemverilog", "verilog", "rtl"], a: "C, C++, Python and SystemVerilog. STM32, ESP32, RTOS and bare-metal firmware. CAN, DoIP and MACsec. RTL, FPGA and cocotb." },
+    { keys: ["contact", "reach", "email", "linkedin", "twitter", "github", "socials", "hire", "resume", "connect"], a: "LinkedIn: https://www.linkedin.com/in/joeysuh1/ · X: https://x.com/6JoeySuh · GitHub: https://github.com/Joeysuh" },
+    { keys: ["thanks", "thank you", "cool", "nice"], a: "Thanks for stopping by!" }
   ];
-  function normalize(s) {
-    return " " + s.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9+#.\- ]+/g, " ").replace(/\s+/g, " ").trim() + " ";
-  }
-  function answerFor(q) {
-    var text = normalize(q), best = null, bestScore = 0;
-    KB.forEach(function (entry) {
+  function scripted(q) {
+    var text = " " + q.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9+#.\- ]+/g, " ").replace(/\s+/g, " ").trim() + " ";
+    var best = null, bestScore = 0;
+    KB.forEach(function (e) {
       var score = 0;
-      entry.keys.forEach(function (k) {
-        if (text.indexOf(" " + k + " ") !== -1 || (k.indexOf(" ") !== -1 && text.indexOf(k) !== -1)) {
-          score += k.indexOf(" ") !== -1 ? 3 : (k.length <= 2 ? 0.5 : 1.5);
-        }
+      e.keys.forEach(function (k) {
+        if (text.indexOf(" " + k + " ") !== -1 || (k.indexOf(" ") !== -1 && text.indexOf(k) !== -1)) score += k.indexOf(" ") !== -1 ? 3 : 1.5;
       });
-      if (entry.id === "hello" && score > 0) score = 0.6;
-      if (score > bestScore) { bestScore = score; best = entry; }
+      if (e.weak && score) score = 0.6;
+      if (score > bestScore) { bestScore = score; best = e; }
     });
-    if (best && bestScore >= 0.5) return best.a();
-    return "<p>Not sure about that one. Try projects, experience, skills or contact.</p>";
+    return best ? best.a : "I can only talk about my work. Try asking about my projects or experience.";
   }
 
-  /* ------------------------------------------------------- command palette */
-  var palette = document.getElementById("palette");
-  var input = document.getElementById("pal-input");
-  var list = document.getElementById("pal-list");
-  var answerBox = palette.querySelector(".pal-answer");
-  var lastFocus = null, results = [], sel = 0;
+  /* ------------------------------------------------------------------ chat */
+  var log = document.querySelector(".log");
+  var chips = document.querySelector(".chips");
+  var form = document.querySelector(".ask");
+  var input = document.getElementById("q");
+  var sendBtn = form.querySelector(".send");
+  var note = document.querySelector("[data-note]");
+  var history = [];
+  var busy = false;
 
-  function go(id) {
-    closePalette();
-    var el = document.getElementById(id);
-    if (!el) return;
-    if (el.classList.contains("item")) { setItem(el, true); scrollToEl(el); }
-    else scrollToEl(el);
-  }
-  var COMMANDS = [
-    { group: "Go to", label: "Work", hint: "projects", run: function () { go("work"); } },
-    { group: "Go to", label: "Experience", hint: "tesla, ford", run: function () { go("experience"); } },
-    { group: "Go to", label: "Lab", hint: "can decoder", run: function () { go("lab"); } },
-    { group: "Projects", label: "Bare-metal RTOS", hint: "stm32", run: function () { go("w-rtos"); } },
-    { group: "Projects", label: "ALIVE", hint: "capstone", run: function () { go("w-alive"); } },
-    { group: "Projects", label: "BitWave accelerator", hint: "rtl", run: function () { go("w-bitwave"); } },
-    { group: "Projects", label: "Multi-precision dot product", hint: "fp8", run: function () { go("w-dot"); } },
-    { group: "Projects", label: "FPGA matrix-vector multiplier", hint: "fpga", run: function () { go("w-fpga"); } },
-    { group: "Theme", label: "Light theme", hint: "theme", run: function () { applyTheme("light"); closePalette(); } },
-    { group: "Theme", label: "Dark theme", hint: "theme", run: function () { applyTheme("dark"); closePalette(); } },
-    { group: "Theme", label: "System theme", hint: "theme", run: function () { applyTheme("system"); closePalette(); } }
-  ];
-  liveSocials.forEach(function (s) {
-    COMMANDS.push({ group: "Links", label: "Open " + s.label, hint: "link", run: function () { closePalette(); window.open(s.url, "_blank", "noopener"); } });
-  });
-  var SUGGESTED = ["What have you built?", "Where have you worked?", "How can I reach you?"];
+  note.textContent = CHAT_ENDPOINT ? "AI answers about my work. It can make mistakes." : "Answers about my work only.";
 
-  function render() {
-    var q = input.value.trim().toLowerCase();
-    results = [];
-    var matched = COMMANDS.filter(function (c) {
-      return !q || (c.label + " " + c.hint + " " + c.group).toLowerCase().indexOf(q) !== -1;
-    });
-    if (q) results.push({ group: "Ask", label: "Ask: " + input.value.trim(), hint: "answer", run: function () { showAnswer(input.value.trim()); } });
-    else SUGGESTED.forEach(function (s) { results.push({ group: "Ask", label: s, hint: "answer", run: function () { showAnswer(s); } }); });
-    results = q && matched.length ? matched.concat(results) : results.concat(matched);
-    sel = 0;
-    list.innerHTML = "";
-    var group = null;
-    results.forEach(function (r, i) {
-      if (r.group !== group) {
-        group = r.group;
-        var g = document.createElement("li");
-        g.className = "pal-group"; g.setAttribute("role", "presentation"); g.textContent = group;
-        list.appendChild(g);
+  /* render text safely: plain text, with http(s) links turned into anchors */
+  function fill(el, text) {
+    el.textContent = "";
+    text.split(/(https?:\/\/[^\s]+)/g).forEach(function (part, i) {
+      if (i % 2 === 1) {
+        var url = part.replace(/[.,)]+$/, "");
+        var a = document.createElement("a");
+        a.href = url; a.rel = "noopener"; a.target = "_blank";
+        a.textContent = url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+        el.appendChild(a);
+        if (url.length < part.length) el.appendChild(document.createTextNode(part.slice(url.length)));
+      } else if (part) {
+        el.appendChild(document.createTextNode(part));
       }
-      var li = document.createElement("li");
-      li.className = "pal-item"; li.id = "pal-opt-" + i; li.setAttribute("role", "option");
-      li.innerHTML = "<span></span><small></small>";
-      li.firstChild.textContent = r.label; li.lastChild.textContent = r.hint;
-      li.addEventListener("click", function () { r.run(); });
-      li.addEventListener("pointermove", function () { if (sel !== i) { sel = i; mark(); } });
-      list.appendChild(li);
     });
-    mark();
   }
-  function mark() {
-    list.querySelectorAll(".pal-item").forEach(function (li, i) { li.setAttribute("aria-selected", String(i === sel)); });
-    var cur = document.getElementById("pal-opt-" + sel);
-    if (cur) { input.setAttribute("aria-activedescendant", cur.id); cur.scrollIntoView({ block: "nearest" }); }
+  function bubble(who, text) {
+    var div = document.createElement("div");
+    div.className = "msg msg-" + who;
+    if (text != null) fill(div, text);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
   }
-  function showAnswer(q) {
-    if (!q) return;
-    answerBox.innerHTML = '<p class="q"></p>' + answerFor(q);
-    answerBox.querySelector(".q").textContent = "> " + q;
-    answerBox.hidden = false;
-    list.hidden = true;
-    input.value = "";
-    input.placeholder = "Ask another";
-    input.focus();
-  }
-  answerBox.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-open]");
-    if (b) go(b.getAttribute("data-open"));
-  });
-  input.addEventListener("input", function () {
-    if (!answerBox.hidden) { answerBox.hidden = true; list.hidden = false; }
-    render();
-  });
-  input.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowDown") { e.preventDefault(); if (!list.hidden && results.length) { sel = (sel + 1) % results.length; mark(); } }
-    else if (e.key === "ArrowUp") { e.preventDefault(); if (!list.hidden && results.length) { sel = (sel - 1 + results.length) % results.length; mark(); } }
-    else if (e.key === "Enter") {
-      e.preventDefault();
-      if (!list.hidden && results[sel]) results[sel].run();
-      else if (input.value.trim()) showAnswer(input.value.trim());
-    }
-  });
-  function openPalette() {
-    if (!palette.hidden) return;
-    lastFocus = document.activeElement;
-    palette.hidden = false;
-    answerBox.hidden = true; list.hidden = false;
-    input.value = ""; input.placeholder = "Ask or jump to…";
-    render();
-    if (lenis) lenis.stop();
-    input.focus();
-    if (hasGsap && motionOn) gsap.fromTo(palette.querySelector(".palette-box"), { opacity: 0, y: -8, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.18, ease: "power2.out" });
-  }
-  function closePalette() {
-    if (palette.hidden) return;
-    palette.hidden = true;
-    if (lenis) lenis.start();
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
-  }
-  document.querySelectorAll("[data-palette]").forEach(function (b) { b.addEventListener("click", openPalette); });
-  palette.addEventListener("click", function (e) { if (e.target === palette) closePalette(); });
-  document.addEventListener("keydown", function (e) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); palette.hidden ? openPalette() : closePalette(); }
-    else if (e.key === "Escape" && !palette.hidden) closePalette();
-    else if (e.key === "/" && palette.hidden && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); openPalette(); }
-  });
-  palette.addEventListener("keydown", function (e) {
-    if (e.key !== "Tab") return;          /* keep focus inside the dialog */
-    var f = palette.querySelectorAll("input, button, a[href]");
-    if (!f.length) return;
-    var first = f[0], lastEl = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); lastEl.focus(); }
-    else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); first.focus(); }
-  });
 
-  /* ------------------------------------------------- nav highlights section */
-  if (window.IntersectionObserver) {
-    var navLinks = document.querySelectorAll('.top nav a[href^="#"]');
-    var spy = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        navLinks.forEach(function (a) { a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + en.target.id)); });
+  function askAI(q) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 15000);
+    return fetch(CHAT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: history.slice(-8) }),
+      signal: ctrl.signal
+    }).then(function (r) {
+      clearTimeout(timer);
+      return r.json().then(function (d) {
+        if (r.ok && d.reply) return d.reply;
+        if (r.status === 429 || r.status === 400) return d.error || scripted(q);
+        throw new Error("chat failed");
       });
-    }, { rootMargin: "-45% 0px -50% 0px" });
-    ["work", "experience", "lab"].forEach(function (id) { var el = document.getElementById(id); if (el) spy.observe(el); });
+    });
   }
 
-  applyTheme(currentChoice());
+  function ask(q) {
+    q = q.trim().slice(0, 400);
+    if (!q || busy) return;
+    busy = true; sendBtn.disabled = true;
+    chips.textContent = "";
+    bubble("me", q);
+    history.push({ role: "user", content: q });
+    var wait = bubble("ai");
+    wait.classList.add("msg-wait");
+    wait.innerHTML = "<span>&bull;</span><span>&bull;</span><span>&bull;</span>";
+    wait.setAttribute("aria-label", "Thinking");
+
+    var answer = CHAT_ENDPOINT
+      ? askAI(q).catch(function () { return scripted(q); })
+      : new Promise(function (res) { setTimeout(function () { res(scripted(q)); }, motionOn ? 420 : 0); });
+
+    answer.then(function (text) {
+      wait.classList.remove("msg-wait");
+      wait.removeAttribute("aria-label");
+      fill(wait, text);
+      history.push({ role: "assistant", content: text });
+      log.scrollTop = log.scrollHeight;
+      busy = false; sendBtn.disabled = false;
+    });
+  }
+
+  ["What are you building?", "Where have you worked?", "How can I reach you?"].forEach(function (s) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = s;
+    b.addEventListener("click", function () { ask(s); });
+    chips.appendChild(b);
+  });
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var q = input.value;
+    input.value = "";
+    ask(q);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && document.activeElement !== input) { e.preventDefault(); input.focus(); }
+  });
 })();
