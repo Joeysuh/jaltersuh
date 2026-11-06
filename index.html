@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Joey | Embedded systems and firmware</title>
-<meta name="description" content="Joey, Computer Engineering at the University of Waterloo, currently at Tesla. Firmware, real-time systems and hardware acceleration.">
+<title>Joey</title>
+<meta name="description" content="Joey. Firmware, real-time systems and hardware accelerators. Computer Engineering at Waterloo, now at Tesla.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#1e1e1e">
 <meta property="og:title" content="Joey">
-<meta property="og:description" content="Firmware, real-time systems and hardware acceleration.">
+<meta property="og:description" content="Firmware, real-time systems and hardware accelerators.">
 <link rel="icon" href="data:,">
 <script>
-  /* theme before paint: saved choice, else the system setting */
   (function () {
     var t = "system";
     try { t = localStorage.getItem("theme") || "system"; } catch (e) {}
@@ -30,10 +29,8 @@
 
 <div class="status" aria-label="Status">
   <span>Waterloo, ON</span>
-  <span><time id="clock">--:--:--</time> ET</span>
-  <span class="hide-sm">FPS <output id="fps">--</output></span>
-  <span><i class="dot" aria-hidden="true"></i> Now at Tesla</span>
-  <span class="hide-sm">Class of 2027</span>
+  <span><time id="clock">--:--:--</time></span>
+  <span><i class="dot" aria-hidden="true"></i>Tesla</span>
 </div>
 
 <header class="top">
@@ -43,64 +40,43 @@
       <li><a href="#work">Work</a></li>
       <li><a href="#experience">Experience</a></li>
       <li><a href="#lab">Lab</a></li>
-      <li><a href="#about">About</a></li>
     </ul>
   </nav>
-  <button class="kbar" type="button" data-palette aria-haspopup="dialog">
-    <span class="hide-sm">Search or ask</span><span class="show-sm">Ask</span>
-    <kbd class="hide-sm" data-mod>⌘K</kbd>
+  <button class="kbar" type="button" data-palette aria-haspopup="dialog" aria-label="Search or ask">
+    <span>Ask</span><kbd class="hide-sm" data-mod>⌘K</kbd>
   </button>
 </header>
 
 <main id="main">
   <section class="hero">
-    <h1>Joey builds firmware, real-time systems and hardware accelerators.</h1>
-    <p class="lede">Computer Engineering at the University of Waterloo. Currently at Tesla. Before that, Harbinger Motors and Ford.</p>
-    <p class="cta"><a class="btn" href="https://github.com/Joeysuh">See my code on GitHub</a></p>
+    <h1>Joey</h1>
+    <p class="lede">Firmware, real-time systems and hardware accelerators.</p>
+    <p class="sub">Computer Engineering, Waterloo &rsquo;27</p>
+    <ul class="socials" data-socials aria-label="Elsewhere"></ul>
   </section>
 
   <section class="row" id="work" aria-labelledby="work-h">
-    <h2 class="label" id="work-h">Selected work</h2>
+    <h2 class="label" id="work-h">Work</h2>
     <ol class="list" data-previews>
       <li class="item" id="w-rtos" data-preview="rtos">
-        <button class="item-head" type="button" aria-expanded="false">
-          <span class="t">Bare-metal RTOS</span><span class="d">EDF scheduler and heap allocator, STM32F401RE</span><span class="m">Personal</span>
-        </button>
-        <div class="item-body"><div class="item-in">
-          <p>A real-time kernel that runs without a vendor OS and schedules tasks by earliest deadline first. It has its own heap allocator that merges adjacent free blocks and uses magic numbers to catch memory corruption.</p>
-        </div></div>
+        <button class="item-head" type="button" aria-expanded="false"><span class="t">Bare-metal RTOS</span><span class="m">STM32</span></button>
+        <div class="item-body"><div class="item-in"><p>EDF scheduler and a heap allocator with corruption checks. No vendor OS.</p></div></div>
       </li>
       <li class="item" id="w-alive" data-preview="alive">
-        <button class="item-head" type="button" aria-expanded="false">
-          <span class="t">ALIVE</span><span class="d">Biometric wearable driving an adaptive game</span><span class="m">Capstone</span>
-        </button>
-        <div class="item-body"><div class="item-in">
-          <p>A wearable that reads biometrics and feeds an adaptive game in Unreal Engine 5. I own the biometric acquisition unit: an STM32F401RE with an ESP32 co-processor, a MAX30102 pulse sensor, an MPU-6050 IMU and a galvanic skin response sensor, cleaned up by a fourth-order Butterworth band-pass filter, plus battery charging and a haptic driver.</p>
-        </div></div>
+        <button class="item-head" type="button" aria-expanded="false"><span class="t">ALIVE</span><span class="m">Capstone</span></button>
+        <div class="item-body"><div class="item-in"><p>Biometric wearable driving an adaptive UE5 game. I built the sensing unit: STM32 + ESP32, pulse, IMU and skin response.</p></div></div>
       </li>
       <li class="item" id="w-bitwave" data-preview="bitwave">
-        <button class="item-head" type="button" aria-expanded="false">
-          <span class="t">BitWave accelerator</span><span class="d">RTL interface, memory and integration</span><span class="m">ECE 493</span>
-        </button>
-        <div class="item-body"><div class="item-in">
-          <p>Team implementation of the BitWave accelerator paper. I wrote the single-port and banked SRAM modules in SystemVerilog and verified them against a Python golden model with cocotb.</p>
-        </div></div>
+        <button class="item-head" type="button" aria-expanded="false"><span class="t">BitWave accelerator</span><span class="m">RTL</span></button>
+        <div class="item-body"><div class="item-in"><p>Memory and integration for the BitWave paper. SRAM in SystemVerilog, verified with cocotb.</p></div></div>
       </li>
       <li class="item" id="w-dot" data-preview="dot">
-        <button class="item-head" type="button" aria-expanded="false">
-          <span class="t">Multi-precision dot product</span><span class="d">16 lanes, FP16 to MXFP8 and UINT8</span><span class="m">SystemVerilog</span>
-        </button>
-        <div class="item-body"><div class="item-in">
-          <p>A 16-lane dot-product unit for FP16, BF16, TF32, FP8, MXFP8 and UINT8. I wrote a Python replica of the reference behavior first, then checked the RTL against test vectors until it matched bit for bit.</p>
-        </div></div>
+        <button class="item-head" type="button" aria-expanded="false"><span class="t">Multi-precision dot product</span><span class="m">RTL</span></button>
+        <div class="item-body"><div class="item-in"><p>16 lanes, FP16 down to MXFP8. Bit-exact against a Python model.</p></div></div>
       </li>
       <li class="item" id="w-fpga" data-preview="fpga">
-        <button class="item-head" type="button" aria-expanded="false">
-          <span class="t">FPGA matrix-vector multiplier</span><span class="d">Pipelined, eight parallel lanes</span><span class="m">SystemVerilog</span>
-        </button>
-        <div class="item-body"><div class="item-in">
-          <p>A pipelined matrix-vector multiplier with eight parallel lanes.</p>
-        </div></div>
+        <button class="item-head" type="button" aria-expanded="false"><span class="t">FPGA matrix-vector multiplier</span><span class="m">FPGA</span></button>
+        <div class="item-body"><div class="item-in"><p>Pipelined, eight parallel lanes.</p></div></div>
       </li>
     </ol>
   </section>
@@ -108,70 +84,45 @@
   <section class="row" id="experience" aria-labelledby="exp-h">
     <h2 class="label" id="exp-h">Experience</h2>
     <ol class="list">
-      <li class="exp"><span class="t">Tesla</span><span class="d">Current</span><span class="m">Now</span></li>
-      <li class="exp"><span class="t">Harbinger Motors</span><span class="d">OTA firmware validation, DoCAN and DoIP diagnostics, MACsec, TCU</span><span class="m">Intern</span></li>
-      <li class="exp"><span class="t">Ford Motor Company</span><span class="d">Multi-threaded ECU simulation, deadlock debugging, CAN and DoIP</span><span class="m">Intern</span></li>
-      <li class="exp"><span class="t">Waterloo FSAE</span><span class="d">HIL and SIL bring-up, BMU firmware</span><span class="m">Team</span></li>
+      <li class="exp"><span class="t">Tesla</span><span class="m">Now</span></li>
+      <li class="exp"><span class="t">Harbinger Motors</span><span class="m">Firmware</span></li>
+      <li class="exp"><span class="t">Ford</span><span class="m">ECU software</span></li>
+      <li class="exp"><span class="t">Waterloo FSAE</span><span class="m">BMU firmware</span></li>
     </ol>
   </section>
 
   <section class="row" id="lab" aria-labelledby="lab-h">
     <h2 class="label" id="lab-h">Lab</h2>
-    <div>
-      <figure class="scope">
-        <div class="scope-screen" id="scope"><noscript><img src="banner.svg" width="1200" height="300" alt=""></noscript></div>
-        <ul class="bytes">
-          <li><button type="button" class="byte" data-bits="01001010" aria-pressed="false"><span class="glyph">J</span><span class="bin">01001010</span></button></li>
-          <li><button type="button" class="byte" data-bits="01101111" aria-pressed="false"><span class="glyph">o</span><span class="bin">01101111</span></button></li>
-          <li><button type="button" class="byte" data-bits="01100101" aria-pressed="false"><span class="glyph">e</span><span class="bin">01100101</span></button></li>
-          <li><button type="button" class="byte" data-bits="01111001" aria-pressed="false"><span class="glyph">y</span><span class="bin">01111001</span></button></li>
-        </ul>
-        <figcaption><b>CAN name decoder.</b> My name as ASCII bytes on a CAN bus differential pair. Select a letter to find its byte.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="row" id="about" aria-labelledby="about-h">
-    <h2 class="label" id="about-h">About</h2>
-    <div class="about">
-      <div class="prose">
-        <p>I like work close to the hardware: bare-metal firmware, real-time scheduling and hardware acceleration. Most of my time goes to C, C++, Python and SystemVerilog.</p>
-        <p>Outside work and class I build test setups and firmware for the Waterloo FSAE team. I graduate in 2027.</p>
-      </div>
-      <dl class="specs">
-        <dt>Languages</dt><dd>C, C++, Python, SystemVerilog</dd>
-        <dt>Embedded</dt><dd>STM32, ESP32, RTOS, bare-metal</dd>
-        <dt>Automotive</dt><dd>CAN, DoCAN, DoIP, MACsec</dd>
-        <dt>Hardware</dt><dd>RTL, FPGA, cocotb</dd>
-      </dl>
-    </div>
-  </section>
-
-  <section class="row" aria-labelledby="theme-h">
-    <h2 class="label" id="theme-h">Theme</h2>
-    <div class="seg" role="radiogroup" aria-labelledby="theme-h">
-      <button type="button" role="radio" data-theme-set="light">Light</button>
-      <button type="button" role="radio" data-theme-set="dark">Dark</button>
-      <button type="button" role="radio" data-theme-set="system">System</button>
-    </div>
+    <figure class="scope">
+      <div class="scope-screen" id="scope"><noscript><img src="banner.svg" width="1200" height="300" alt=""></noscript></div>
+      <ul class="bytes">
+        <li><button type="button" class="byte" data-bits="01001010" aria-pressed="false"><span class="glyph">J</span><span class="bin">01001010</span></button></li>
+        <li><button type="button" class="byte" data-bits="01101111" aria-pressed="false"><span class="glyph">o</span><span class="bin">01101111</span></button></li>
+        <li><button type="button" class="byte" data-bits="01100101" aria-pressed="false"><span class="glyph">e</span><span class="bin">01100101</span></button></li>
+        <li><button type="button" class="byte" data-bits="01111001" aria-pressed="false"><span class="glyph">y</span><span class="bin">01111001</span></button></li>
+      </ul>
+      <figcaption>My name on a CAN bus.</figcaption>
+    </figure>
   </section>
 </main>
 
 <footer class="foot">
-  <ul class="socials" data-socials aria-label="Elsewhere"></ul>
-  <p>Joey, 2026. Hand-built, no framework. Press <kbd data-mod>⌘K</kbd> to ask about my work.</p>
+  <span>&copy; 2026 Joey</span>
+  <div class="seg" role="radiogroup" aria-label="Theme">
+    <button type="button" role="radio" data-theme-set="light">Light</button>
+    <button type="button" role="radio" data-theme-set="dark">Dark</button>
+    <button type="button" role="radio" data-theme-set="system">Auto</button>
+  </div>
 </footer>
 
-<!-- floating preview for the work list -->
 <div class="preview" aria-hidden="true"><img alt="" width="480" height="480"></div>
 
-<!-- command palette: navigation, theme, links, and questions -->
 <div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Search or ask" hidden>
   <div class="palette-box">
-    <input id="pal-input" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command or ask a question" aria-label="Type a command or ask a question" aria-controls="pal-list">
+    <input id="pal-input" type="text" autocomplete="off" spellcheck="false" placeholder="Ask or jump to…" aria-label="Ask or jump to" aria-controls="pal-list">
     <ul class="pal-list" id="pal-list" role="listbox" aria-label="Results"></ul>
     <div class="pal-answer" aria-live="polite" hidden></div>
-    <p class="pal-hint"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span><span class="pal-note">Answers are scripted from this site, not a live AI.</span></p>
+    <p class="pal-hint"><span><kbd>↑</kbd><kbd>↓</kbd></span><span><kbd>↵</kbd></span><span><kbd>esc</kbd></span><span class="pal-note">Scripted answers</span></p>
   </div>
 </div>
 

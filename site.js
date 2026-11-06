@@ -10,22 +10,22 @@
   if (!isMac) document.querySelectorAll("[data-mod]").forEach(function (k) { k.textContent = "Ctrl K"; });
 
   /* ------------------------------------------------------------------ socials
-     Add a URL to show an icon. Icon paths: simple-icons (CC0). */
+     Icons: GitHub from simple-icons (CC0); LinkedIn and X from Font Awesome
+     Free brands (CC BY 4.0, https://fontawesome.com/license/free). */
   var SOCIALS = [
-    { id: "github", label: "GitHub", url: "https://github.com/Joeysuh",
+    { id: "github", label: "GitHub", url: "https://github.com/Joeysuh", box: "0 0 24 24",
       path: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" },
-    { id: "linkedin", label: "LinkedIn", url: "", path: "" },
-    { id: "x", label: "X", url: "",
-      path: "M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z" },
-    { id: "email", label: "Email", url: "",
-      path: "M2 5h20v14H2zM3.5 6.5v.3l8.5 6 8.5-6v-.3zM20.5 8.6l-8.5 6-8.5-6v8.9h17z" }
+    { id: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/joeysuh1/", box: "0 0 448 512",
+      path: "M416 32L31.9 32C14.3 32 0 46.5 0 64.3L0 447.7C0 465.5 14.3 480 31.9 480L416 480c17.6 0 32-14.5 32-32.3l0-383.4C448 46.5 433.6 32 416 32zM135.4 416l-66.4 0 0-213.8 66.5 0 0 213.8-.1 0zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77zM384.3 416l-66.4 0 0-104c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9l0 105.8-66.4 0 0-213.8 63.7 0 0 29.2 .9 0c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9l0 117.2z" },
+    { id: "x", label: "X", url: "https://x.com/6JoeySuh", box: "0 0 448 512",
+      path: "M357.2 48L427.8 48 273.6 224.2 455 464 313 464 201.7 318.6 74.5 464 3.8 464 168.7 275.5-5.2 48 140.4 48 240.9 180.9 357.2 48zM332.4 421.8l39.1 0-252.4-333.8-42 0 255.3 333.8z" }
   ];
   var liveSocials = SOCIALS.filter(function (s) { return s.url && s.path; });
   var socialList = document.querySelector("[data-socials]");
   liveSocials.forEach(function (s) {
     var li = document.createElement("li");
     li.innerHTML = '<a href="' + s.url + '" aria-label="' + s.label + '" title="' + s.label + '"' +
-      (s.url.indexOf("mailto:") === 0 ? "" : ' rel="me noopener"') + '><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + s.path + '"/></svg></a>';
+      (s.url.indexOf("mailto:") === 0 ? "" : ' rel="me noopener"') + '><svg viewBox="' + s.box + '" aria-hidden="true"><path d="' + s.path + '"/></svg></a>';
     if (socialList) socialList.appendChild(li);
   });
 
@@ -257,7 +257,7 @@
     { id: "can", keys: ["can bus", "canbus", "automotive", "diagnostics", "decoder"],
       a: function () { return "<p>CAN keeps coming up in my work. The lab section has my name sent as ASCII on a CAN bus.</p>" + openBtn("lab", "Go to the lab"); } },
     { id: "contact", keys: ["contact", "reach", "email", "mail", "linkedin", "twitter", "github", "socials", "social", "hire", "hiring", "resume", "cv", "connect", "dm"],
-      a: function () { var l = socialLinksHtml(); return l ? "<p>You can find me here:</p>" + l : "<p>Links are coming soon.</p>"; } },
+      a: function () { var l = socialLinksHtml(); return l ? "<p>Find me here:</p>" + l : "<p>Links coming soon.</p>"; } },
     { id: "site", keys: ["this site", "website", "site", "chatbot", "bot", "ai", "built this"],
       a: function () { return "<p>Hand-written HTML, CSS and JavaScript on GitHub Pages, with GSAP and Lenis for motion. These answers are scripted from what's on the site, so nothing you type leaves your browser.</p>"; } },
     { id: "thanks", keys: ["thanks", "thank you", "ty", "cool", "nice"],
@@ -279,7 +279,7 @@
       if (score > bestScore) { bestScore = score; best = entry; }
     });
     if (best && bestScore >= 0.5) return best.a();
-    return "<p>I don't have an answer for that one. Try asking about my projects, internships, Tesla, skills or how to reach me.</p>";
+    return "<p>Not sure about that one. Try projects, experience, skills or contact.</p>";
   }
 
   /* ------------------------------------------------------- command palette */
@@ -297,10 +297,9 @@
     else scrollToEl(el);
   }
   var COMMANDS = [
-    { group: "Go to", label: "Selected work", hint: "work", run: function () { go("work"); } },
+    { group: "Go to", label: "Work", hint: "projects", run: function () { go("work"); } },
     { group: "Go to", label: "Experience", hint: "tesla, ford", run: function () { go("experience"); } },
     { group: "Go to", label: "Lab", hint: "can decoder", run: function () { go("lab"); } },
-    { group: "Go to", label: "About", hint: "skills", run: function () { go("about"); } },
     { group: "Projects", label: "Bare-metal RTOS", hint: "stm32", run: function () { go("w-rtos"); } },
     { group: "Projects", label: "ALIVE", hint: "capstone", run: function () { go("w-alive"); } },
     { group: "Projects", label: "BitWave accelerator", hint: "rtl", run: function () { go("w-bitwave"); } },
@@ -313,7 +312,7 @@
   liveSocials.forEach(function (s) {
     COMMANDS.push({ group: "Links", label: "Open " + s.label, hint: "link", run: function () { closePalette(); window.open(s.url, "_blank", "noopener"); } });
   });
-  var SUGGESTED = ["What are you doing at Tesla?", "Tell me about the RTOS", "Where have you interned?", "What languages do you use?", "How can I reach you?"];
+  var SUGGESTED = ["What have you built?", "Where have you worked?", "How can I reach you?"];
 
   function render() {
     var q = input.value.trim().toLowerCase();
@@ -356,7 +355,7 @@
     answerBox.hidden = false;
     list.hidden = true;
     input.value = "";
-    input.placeholder = "Ask something else";
+    input.placeholder = "Ask another";
     input.focus();
   }
   answerBox.addEventListener("click", function (e) {
@@ -381,7 +380,7 @@
     lastFocus = document.activeElement;
     palette.hidden = false;
     answerBox.hidden = true; list.hidden = false;
-    input.value = ""; input.placeholder = "Type a command or ask a question";
+    input.value = ""; input.placeholder = "Ask or jump to…";
     render();
     if (lenis) lenis.stop();
     input.focus();
@@ -418,7 +417,7 @@
         navLinks.forEach(function (a) { a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + en.target.id)); });
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
-    ["work", "experience", "lab", "about"].forEach(function (id) { var el = document.getElementById(id); if (el) spy.observe(el); });
+    ["work", "experience", "lab"].forEach(function (id) { var el = document.getElementById(id); if (el) spy.observe(el); });
   }
 
   applyTheme(currentChoice());
