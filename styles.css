@@ -59,28 +59,37 @@ button{font:inherit;color:inherit}
 .list li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--rule)}
 .list li:last-child{border-bottom:0}
 .m{flex:none;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
-.foot{padding-top:20px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.foot{display:flex;justify-content:space-between;gap:16px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.foot a{text-underline-offset:.25em}
+.foot a:hover{color:var(--fg)}
 
-/* ---- the F1 car: a lane at the bottom edge, opaque so it never sits on content ---- */
+/* ---- the F1 car: a lane at the bottom edge, opaque so lane passes never sit on content ---- */
 .lane{position:fixed;left:0;right:0;bottom:0;z-index:1;height:calc(var(--lane) + env(safe-area-inset-bottom));
   background:var(--bg);overflow:hidden;pointer-events:none}
 .lane::after{content:"";position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom);height:1px;background:var(--rule)}
-.car{position:absolute;left:0;bottom:calc(1px + env(safe-area-inset-bottom));display:block;transform:translateX(-60px)}
+/* the car rides a full-viewport layer so the occasional loop can leave the lane.
+   site.js moves it; it stays hidden between passes. */
+.drive{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.car{position:absolute;left:0;top:0;display:block;visibility:hidden;offset-anchor:50% 100%;offset-rotate:auto}
 
-/* ---- the only two motions on the site ---- */
+/* ---- circuit page: the whole viewport is the drawing surface ---- */
+.circuit-page{overflow:hidden;overscroll-behavior:none}
+.pad{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.circuit-ui{position:relative;z-index:1;gap:28px;padding-bottom:0;pointer-events:none}
+.circuit-ui a,.circuit-ui button{pointer-events:auto}
+.back{align-self:flex-start;font-family:var(--mono);font-size:.75rem;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--fg)}
+.readout{margin:12px 0 0;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.clear{margin-left:12px;padding:0;border:0;background:none;font-family:var(--mono);font-size:.75rem;color:var(--muted);text-decoration:underline;text-underline-offset:.25em;cursor:pointer}
+.clear:hover{color:var(--fg)}
+
+/* ---- motion ---- */
 @media (prefers-reduced-motion:no-preference){
-  /* 1. the trace sweeps in once, like a scope, then holds */
+  /* the trace sweeps in once, like a scope, then holds */
   .can{animation:sweep 1.4s cubic-bezier(.3,0,.2,1) .15s both}
-  /* 2. one pass every 10s: 2.5s across, ease-in-out, then off-screen until the next */
-  .car{animation:pass 10s 4s infinite both}
-  .tab-hidden .car{animation-play-state:paused}
 }
 @keyframes sweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes pass{
-  0%{transform:translateX(-60px);animation-timing-function:cubic-bezier(.45,0,.55,1)}
-  25%,100%{transform:translateX(calc(100vw + 4px))}
-}
 @media (prefers-reduced-motion:reduce){
-  .lane{display:none}
+  .lane,.drive{display:none}
   .col{padding-bottom:48px}
 }

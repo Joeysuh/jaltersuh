@@ -36,28 +36,40 @@ One narrow centered column, generous whitespace, one typeface system, one small 
 3. Links row: GitHub, LinkedIn, X (brand icons, navy).
 4. The chat, flattened: a plain underlined text field, an arrow send button, a tiny grey note underneath. No glass, no bubbles, no shadow, no suggestion chips.
 5. Work and Experience as plain rows with hairline rules: name + short tag only.
-6. Footer: "© 2026 Joey".
+6. Footer: "© 2026 Joey" on the left, a "Draw a circuit" link to `circuit.html` on the right (mono, muted).
 
 ## The F1 car (the one unique twist)
 
 - Small single-color line-art open-wheel F1 silhouette, navy `#1b2547`, about 56px wide, inline SVG.
 - Drives on a thin 1px track line fixed at the very bottom edge of the viewport.
-- Crosses left to right once every ~10s (first pass 4s after load), taking ~2.5s, ease-in-out, then disappears until the next pass.
-- No sound, no trail, never overlaps content (the lane is opaque cream, and the page has bottom padding so the footer clears it).
-- Fully disabled under `prefers-reduced-motion` (lane hidden). Paused when the tab is hidden (`visibilitychange` toggles `.tab-hidden`).
+- A pass starts every ~10s (first pass 4s after load). A lane pass crosses left to right in ~2.5s, ease-in-out, then the car disappears until the next pass.
+- Every third pass (the 2nd, 5th, 8th...) is a loop-the-loop: the car runs the lane, does one vertical loop centered on the screen (wheels on the inside of the loop, so it is upside down at the top), drops back to the lane and exits right. Uses CSS `offset-path`; browsers without it only get lane passes.
+- Lane passes never overlap content (the lane is opaque cream, and the page has bottom padding so the footer clears it). The loop crosses content on purpose, at Joey's request. That is the only exception.
+- No sound, no trail.
+- Driven by `site.js` (Web Animations API), not CSS keyframes. Fully disabled under `prefers-reduced-motion` (lane and car hidden). Paused when the tab is hidden, including mid-pass.
+
+## Circuit page (`circuit.html`)
+
+- Same tokens, fonts and column header as the home page: "← Joey" back link, "Circuit", one line, a mono readout.
+- The whole viewport is the drawing surface. Draw a closed loop; on release it is trimmed where the start and end meet, smoothed, and drawn as a race track (two 1px navy edges, 18px wide, start/finish tick).
+- A top-down line-art F1 car laps the track. Speed comes from a small lap sim (grip-limited corner speed, then acceleration and braking passes), so it slows in corners. Readout: track length and lap time.
+- "Clear" resets. Drawing again replaces the track. Under reduced motion the car parks on the start line and the readout still shows.
+- Still no red on this page.
 
 ## Motion rules
 
-Only two motions on the whole site:
+The only motion on the site:
 
 1. The CAN waveform draws once on load, then stays still.
-2. The F1 car pass above.
+2. The F1 car passes above (lane passes plus the occasional loop).
+3. The car lapping a drawn track on the circuit page.
 
-Everything else is static. No GSAP, no Lenis, no scroll reveals, no parallax, no magnetic hover, no blinking/live dots, no typing or loading animations, no hover transitions. Both motions live inside `@media (prefers-reduced-motion: no-preference)`.
+Everything else is static. No GSAP, no Lenis, no scroll reveals, no parallax, no magnetic hover, no blinking/live dots, no typing or loading animations, no hover transitions. All of it is off under `prefers-reduced-motion: reduce`.
 
 ## Files
 
 - `index.html`: markup, including the inline CAN trace and car SVGs.
-- `styles.css`: all styling and the two animations.
-- `site.js`: social icons, scripted chat + optional AI endpoint (`CHAT_ENDPOINT`), tab-visibility pause.
+- `styles.css`: all styling for both pages, and the trace sweep.
+- `site.js`: social icons, scripted chat + optional AI endpoint (`CHAT_ENDPOINT`), the car pass scheduler (lane, loop, tab pause).
+- `circuit.html` + `circuit.js`: the draw-a-circuit page and its lap sim.
 - `chat-worker/`: Cloudflare Worker backend for the chat (see its README).
