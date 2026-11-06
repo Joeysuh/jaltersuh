@@ -5,9 +5,11 @@
      While it's empty, the chat uses the scripted answers below. */
   var CHAT_ENDPOINT = "";
 
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var motionOn = !reduceMotion;
-  var hasGsap = typeof window.gsap !== "undefined";
+  /* --------------------------------------------- F1 car: pause on hidden tab
+     The pass itself is CSS (styles.css). This only freezes it in the background. */
+  function syncTab() { document.documentElement.classList.toggle("tab-hidden", document.hidden); }
+  document.addEventListener("visibilitychange", syncTab);
+  syncTab();
 
   /* ------------------------------------------------------------------ socials
      Icons: GitHub from simple-icons (CC0); LinkedIn and X from Font Awesome
@@ -25,39 +27,6 @@
     var li = document.createElement("li");
     li.innerHTML = '<a href="' + s.url + '" aria-label="' + s.label + '" title="' + s.label + '" rel="me noopener"><svg viewBox="' + s.box + '" aria-hidden="true"><path d="' + s.path + '"/></svg></a>';
     list.appendChild(li);
-  });
-
-  /* ----------------------------------------------------------------- clock */
-  var clock = document.getElementById("clock");
-  var fmt = null;
-  try { fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", minute: "2-digit", hour12: false }); } catch (e) {}
-  function tick() { if (fmt) clock.textContent = fmt.format(new Date()) + " ET"; }
-  tick(); setInterval(tick, 15000);
-
-  /* --------------------------------------------------------- smooth scroll */
-  if (motionOn && hasGsap && typeof window.Lenis !== "undefined") {
-    var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
-    gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
-    gsap.ticker.lagSmoothing(0);
-  }
-
-  /* ----------------------------------------------- one entrance: paint settles */
-  if (motionOn && hasGsap) {
-    gsap.fromTo(".paint img", { scale: 1.08 }, { scale: 1, duration: 2.4, ease: "power2.out" });
-    gsap.fromTo(".intro > *, .chat", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.08, delay: 0.25 });
-  }
-
-  /* ------------------------------------------------------------- work list */
-  document.querySelectorAll(".item").forEach(function (item) {
-    var head = item.querySelector(".item-head");
-    var body = item.querySelector(".item-body");
-    head.addEventListener("click", function () {
-      var open = !item.classList.contains("open");
-      item.classList.toggle("open", open);
-      head.setAttribute("aria-expanded", String(open));
-      if (hasGsap && motionOn) gsap.to(body, { height: open ? "auto" : 0, duration: 0.4, ease: "power2.inOut", overwrite: true });
-      else body.style.height = open ? "auto" : "0px";
-    });
   });
 
   /* ------------------------------------------------------- scripted answers
@@ -97,7 +66,6 @@
 
   /* ------------------------------------------------------------------ chat */
   var log = document.querySelector(".log");
-  var chips = document.querySelector(".chips");
   var form = document.querySelector(".ask");
   var input = document.getElementById("q");
   var sendBtn = form.querySelector(".send");
@@ -123,8 +91,8 @@
       }
     });
   }
-  function bubble(who, text) {
-    var div = document.createElement("div");
+  function line(who, text) {
+    var div = document.createElement("p");
     div.className = "msg msg-" + who;
     if (text != null) fill(div, text);
     log.appendChild(div);
@@ -154,17 +122,15 @@
     q = q.trim().slice(0, 400);
     if (!q || busy) return;
     busy = true; sendBtn.disabled = true;
-    chips.textContent = "";
-    bubble("me", q);
+    line("me", q);
     history.push({ role: "user", content: q });
-    var wait = bubble("ai");
+    var wait = line("ai", "…");
     wait.classList.add("msg-wait");
-    wait.innerHTML = "<span>&bull;</span><span>&bull;</span><span>&bull;</span>";
     wait.setAttribute("aria-label", "Thinking");
 
     var answer = CHAT_ENDPOINT
       ? askAI(q).catch(function () { return scripted(q); })
-      : new Promise(function (res) { setTimeout(function () { res(scripted(q)); }, motionOn ? 420 : 0); });
+      : new Promise(function (res) { setTimeout(function () { res(scripted(q)); }, 300); });
 
     answer.then(function (text) {
       wait.classList.remove("msg-wait");
@@ -176,12 +142,6 @@
     });
   }
 
-  ["What are you building?", "Where have you worked?", "How can I reach you?"].forEach(function (s) {
-    var b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = s;
-    b.addEventListener("click", function () { ask(s); });
-    chips.appendChild(b);
-  });
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var q = input.value;

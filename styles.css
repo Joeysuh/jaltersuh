@@ -1,112 +1,86 @@
-/* Colors come from the painting: cream and navy do the work, Tesla red is kept
-   for the one control the page wants pressed (send) and the live dot. */
+/* Locked tokens. See CLAUDE.md before changing anything here.
+   Tesla red appears once: the chat send arrow. */
 :root{
-  --bg:#f3ecdc; --fg:#1b2547; --muted:#5d6479; --faint:#8e93a3; --rule:#ddd3bf;
-  --glass:rgba(250,246,236,.78); --glass-fg:#1b2547;
-  --accent:#e31937; --accent-hover:#c4142e;
+  --bg:#f3ecdc; --fg:#1b2547; --muted:#5d6479; --rule:#ddd3bf;
+  --accent:#e31937;
   --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --wide:64rem;
+  --col:600px; --gap:44px; --pad:20px;
+  --lane:20px;
   color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#131a31; --fg:#f1ead8; --muted:#a9afc2; --faint:#737a90; --rule:#283152;
-    --glass:rgba(19,26,49,.72); --glass-fg:#f1ead8;
-    color-scheme:dark;
-  }
 }
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:1rem;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit}
-:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:3px}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:2px}
 button{font:inherit;color:inherit}
 
-/* ---- hero: the painting fills the first screen ---- */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;color:#fff;overflow:hidden;isolation:isolate}
-.paint,.paint img{position:absolute;inset:0;width:100%;height:100%;z-index:-2}
-.paint img{object-fit:cover;object-position:center 40%}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(12,20,45,.42) 0%,rgba(12,20,45,0) 22%,rgba(12,20,45,0) 45%,rgba(12,20,45,.55) 100%)}
+/* ---- the column ---- */
+.col{display:flex;flex-direction:column;gap:var(--gap);max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;
+  padding:56px var(--pad) calc(48px + var(--lane) + env(safe-area-inset-bottom))}
 
-.bar{display:flex;gap:1.5rem;width:100%;max-width:var(--wide);margin:0 auto;padding:1rem 1.25rem;
-  font-family:var(--mono);font-size:.75rem;letter-spacing:.02em;font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.35)}
-.dot{display:inline-block;width:.45rem;height:.45rem;margin-right:.35rem;border-radius:50%;background:var(--accent);vertical-align:.05rem;box-shadow:0 0 0 2px rgba(255,255,255,.5)}
-@media (prefers-reduced-motion:no-preference){.dot{animation:blink 2.4s ease-in-out infinite}}
-@keyframes blink{50%{opacity:.4}}
+/* ---- CAN trace ---- */
+.can{display:block;width:100%;height:28px}
+.can path{fill:none;stroke:var(--fg);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 
-.hero-in{flex:1;display:grid;grid-template-columns:1fr minmax(0,26rem);align-items:end;gap:2rem;
-  width:100%;max-width:var(--wide);margin:0 auto;padding:2rem 1.25rem clamp(2rem,6vh,4rem)}
-.intro{text-shadow:0 2px 18px rgba(8,14,34,.45)}
-.hero h1{margin:0;font-size:clamp(4.5rem,15vw,10rem);line-height:.85;letter-spacing:-.06em;font-weight:500}
-.lede{max-width:22ch;margin:1rem 0 0;font-size:clamp(1.15rem,2.2vw,1.45rem);line-height:1.3;letter-spacing:-.01em}
+/* ---- intro ---- */
+.intro h1{margin:0;font-size:1.375rem;line-height:1.3;font-weight:500;letter-spacing:-.01em}
+.lede{margin:.25rem 0 0;color:var(--muted)}
 
-.socials{display:flex;gap:.25rem;margin:1.25rem 0 0 -.65rem;padding:0;list-style:none}
-.socials a{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;color:#fff}
-.socials a:hover{background:rgba(255,255,255,.16)}
-.socials svg{width:1.25rem;height:1.25rem;fill:currentColor;filter:drop-shadow(0 1px 4px rgba(0,0,0,.35))}
+.socials{display:flex;gap:4px;margin:-8px 0 -8px -9px;padding:0;list-style:none}
+.socials a{display:grid;place-items:center;width:36px;height:36px;color:var(--fg)}
+.socials a:hover{color:var(--muted)}
+.socials svg{width:18px;height:18px;fill:currentColor}
 
-/* ---- chat ---- */
-.chat{display:flex;flex-direction:column;gap:.6rem;color:var(--glass-fg)}
-.log{display:flex;flex-direction:column;gap:.5rem;max-height:min(42svh,22rem);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+/* ---- chat, flat ---- */
+.log{display:flex;flex-direction:column;gap:.35rem;max-height:18rem;margin-bottom:1rem;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .log:empty{display:none}
-.msg{max-width:92%;padding:.6rem .85rem;border-radius:1rem;font-size:.9375rem;line-height:1.5;
-  background:var(--glass);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+.msg{margin:0;font-size:.9375rem;line-height:1.55}
 .msg a{text-underline-offset:.2em}
-.msg-me{align-self:flex-end;background:rgba(27,37,71,.86);color:#f3ecdc;border-bottom-right-radius:.35rem}
-.msg-ai{align-self:flex-start;border-bottom-left-radius:.35rem}
+.msg-me{color:var(--muted)}
+.msg-me:not(:first-child){margin-top:.65rem}
 .msg-wait{color:var(--muted)}
-.msg-wait span{display:inline-block;animation:wait 1s infinite}
-.msg-wait span:nth-child(2){animation-delay:.15s}.msg-wait span:nth-child(3){animation-delay:.3s}
-@keyframes wait{50%{opacity:.25}}
 
-.chips{display:flex;flex-wrap:wrap;gap:.4rem}
-.chips:empty{display:none}
-.chip{padding:.4rem .8rem;border:0;border-radius:999px;background:var(--glass);color:var(--glass-fg);font-size:.875rem;cursor:pointer;
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.chip:hover{background:rgba(255,255,255,.92)}
-@media (prefers-color-scheme: dark){.chip:hover{background:rgba(27,37,71,.92)}}
-
-.ask{display:flex;align-items:center;gap:.4rem;padding:.35rem .35rem .35rem 1.1rem;border-radius:999px;background:var(--glass);
-  backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);box-shadow:0 10px 30px -12px rgba(8,14,34,.5)}
-.ask input{flex:1;min-width:0;padding:.55rem 0;border:0;background:none;color:var(--glass-fg);font:inherit;font-size:1rem}
-.ask input::placeholder{color:var(--muted)}
+.ask{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--fg);padding-bottom:1px}
+.ask:focus-within{border-bottom-width:2px;padding-bottom:0}
+.ask input{flex:1;min-width:0;padding:8px 0;border:0;border-radius:0;background:none;color:var(--fg);font:inherit;font-size:1rem}
+.ask input::placeholder{color:var(--muted);opacity:1}
 .ask input:focus{outline:none}
-.ask:focus-within{box-shadow:0 0 0 2px rgba(255,255,255,.85),0 10px 30px -12px rgba(8,14,34,.5)}
-.send{display:grid;place-items:center;flex:none;width:2.5rem;height:2.5rem;border:0;border-radius:50%;background:var(--accent);color:#fff;cursor:pointer;transition:background-color .15s ease}
-.send:hover{background:var(--accent-hover)}
-.send:disabled{opacity:.5;cursor:default}
-.send svg{width:1.15rem;height:1.15rem;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.note{margin:0;padding-left:1.1rem;font-family:var(--mono);font-size:.6875rem;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.send{display:grid;place-items:center;flex:none;width:36px;height:36px;margin-right:-8px;padding:0;border:0;background:none;color:var(--accent);cursor:pointer}
+.send:disabled{opacity:.4;cursor:default}
+.send svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.note{margin:8px 0 0;font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
 
-/* ---- page below the painting ---- */
-.page{max-width:var(--wide);margin:0 auto;padding:clamp(3rem,8vw,5rem) 1.25rem 0}
-.row{display:grid;grid-template-columns:10rem 1fr;gap:.75rem 2rem;padding:1.5rem 0 2.5rem}
-.label{margin:0;padding-top:.85rem;font-family:var(--mono);font-size:.75rem;font-weight:400;color:var(--muted)}
+/* ---- work + experience ---- */
+.label{margin:0 0 4px;font-family:var(--mono);font-size:.75rem;font-weight:400;color:var(--muted)}
 .list{margin:0;padding:0;list-style:none}
-.item,.exp{border-bottom:1px solid var(--rule)}
-.list>li:last-child{border-bottom:0}
-.item-head,.exp{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:baseline;width:100%;padding:.85rem 0;border:0;background:none;text-align:left}
-.item-head{cursor:pointer}
-.t{font-weight:500;font-size:1.0625rem}
-.m{font-family:var(--mono);font-size:.75rem;color:var(--faint)}
-.item-head:hover .t,.item.open .t{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.22em}
-.item-body{height:0;overflow:hidden}
-.item-body p{max-width:34rem;margin:0;padding:0 0 1rem;color:var(--muted)}
-.foot{padding:2rem 0 2.5rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--faint)}
+.list li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.list li:last-child{border-bottom:0}
+.m{flex:none;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.foot{padding-top:20px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 
-@media (max-width:52rem){
-  .hero-in{grid-template-columns:1fr;align-items:end;gap:1.5rem}
-  .chat{max-width:30rem}
+/* ---- the F1 car: a lane at the bottom edge, opaque so it never sits on content ---- */
+.lane{position:fixed;left:0;right:0;bottom:0;z-index:1;height:calc(var(--lane) + env(safe-area-inset-bottom));
+  background:var(--bg);overflow:hidden;pointer-events:none}
+.lane::after{content:"";position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom);height:1px;background:var(--rule)}
+.car{position:absolute;left:0;bottom:calc(1px + env(safe-area-inset-bottom));display:block;transform:translateX(-60px)}
+
+/* ---- the only two motions on the site ---- */
+@media (prefers-reduced-motion:no-preference){
+  /* 1. the trace sweeps in once, like a scope, then holds */
+  .can{animation:sweep 1.4s cubic-bezier(.3,0,.2,1) .15s both}
+  /* 2. one pass every 25s: 2.5s across, ease-in-out, then off-screen until the next */
+  .car{animation:pass 25s 4s infinite both}
+  .tab-hidden .car{animation-play-state:paused}
 }
-@media (max-width:40rem){
-  .row{grid-template-columns:1fr;gap:0}
-  .label{padding-top:0}
-  .bar{gap:1rem}
+@keyframes sweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes pass{
+  0%{transform:translateX(-60px);animation-timing-function:cubic-bezier(.45,0,.55,1)}
+  10%,100%{transform:translateX(calc(100vw + 4px))}
 }
 @media (prefers-reduced-motion:reduce){
-  .send{transition:none}
-  .msg-wait span{animation:none}
+  .lane{display:none}
+  .col{padding-bottom:48px}
 }
