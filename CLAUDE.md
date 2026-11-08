@@ -26,13 +26,13 @@ Base values. On the home page they are re-tinted from the current painting (see 
 | `--muted` | `#5d6479` |
 | `--rule` hairlines | `#ddd3bf` |
 | `--sage`, `--gold` | `#9aa27c`, `#c8a45e` (washes and tints only, never text) |
-| Accent (only one) | Tesla red `#e31937`, used ONLY on the chat send arrow. It never re-tints. Nowhere else: not links, not hover, not focus, not the car, not the dots. |
+| Accent (only one) | Tesla red `#e31937`, used ONLY on the chat send arrow. It never re-tints. Nowhere else: not links, not hover, not focus, not the car, not the credit. |
 
 - Type: Geist for body, Geist Mono for small labels, and one contrasting serif accent: Newsreader (variable), for the "Joey" nameplate only (loaded subset to those four letters). No other fonts.
 - Type scale, SF-style: nameplate 28 (Title 1, serif), body 17 for the lede, the ask field and row names, 15 for previews and chat lines, 13 for section labels, 12 for tags, credit, notes and the footer. Slight negative tracking (-0.01em) on 17px text.
 - Layout: one centered column, 560-640px wide (currently 600px), 35-50px gaps between blocks (currently 44px).
-- Every tap target is at least 44x44px (socials, send, dots, rows, credit and footer links), with the hit area extended invisibly where the visual is smaller.
-- Glass, as a finish on four small surfaces only: the ask box, the credit chip and the dots capsule over the painting, and the row preview cards. The ask box over flat paper is the reference for how all of them read. Material: a fixed warm white, `rgba(251,248,241,.88)`, that never re-tints with the painting (dusk: `rgba(30,30,34,.86)`), backdrop blur 20px with no saturation boost, a fixed warm hairline edge, a top highlight and one soft shadow, radius 14px or a capsule. Without backdrop-filter support the glass goes nearly opaque. The page itself stays cream paper, never a glass sheet, and nothing else gets glass, boxes or shadows.
+- Every tap target is at least 44x44px (socials, send, rows, credit and footer links), with the hit area extended invisibly where the visual is smaller.
+- Glass, as a finish on three small surfaces only: the ask box, the credit chip over the painting, and the row preview cards. The ask box over flat paper is the reference for how all of them read. Material: a fixed warm white, `rgba(251,248,241,.88)`, that never re-tints with the painting (dusk: `rgba(30,30,34,.86)`), backdrop blur 20px with no saturation boost, a fixed warm hairline edge, a top highlight and one soft shadow, radius 14px or a capsule. Without backdrop-filter support the glass goes nearly opaque. The page itself stays cream paper, never a glass sheet, and nothing else gets glass, boxes or shadows.
 - Gradients exist only in the band: its dissolve mask, its sage/gold wash, the soft page tint (see Horizon band), and the director's-cut atmosphere inside the painting (cloud shadows, light ray, glass sheen). Nowhere else.
 - Tactile grain: a barely-there SVG noise layer over the home page (multiply at 7%, soft-light at 10% in dark mode) so it reads as printed paper. If it ever looks dirty, remove it rather than strengthening it.
 - Dark mode exists on the home page only, as a dusk version of each painting's palette. The circuit page stays cream.
@@ -51,13 +51,15 @@ Base values. On the home page they are re-tinted from the current painting (see 
 ## Horizon band (`horizon.js`)
 
 - A full-width pastoral painting across the top (`clamp(320px, 62vh, 640px)` tall). It rotates to a new painting every 8s with a 0.8s crossfade.
-- Order: the first painting on each load is random; the rest run in shuffled order with no repeats until the pool is used up, then reshuffle. Up to 8 paintings per visit.
-- Small dots under the band (in a hairline pill) jump to a painting and reseed the queue. Nothing on the page announces the random pull.
-- Live pull: one request per load to the Art Institute of Chicago API (`is_public_domain` only), then filtered client-side: paintings tagged as landscapes with rural subjects (fields, rivers, countryside, cattle...), wide (1.25 to 2.4), calm dominant colour (saturation 62 or less, lightness 28 to 88), dated 1700 to 1925, and nothing stormy, nocturnal, wintry, urban, at sea or a portrait.
-- Fallbacks, used when the API fails, is slow (over 2.5s) or returns fewer than 4 fits: Constable "The Hay Wain", Constable "Stoke-by-Nayland" (in place of the Abby Matthews piece, which isn't public domain), Corot "River with a Distant Tower", Corot "The Vire at Saint-Lô". All public domain, hosted on Wikimedia Commons (a different host from the live pull). They can be bundled into `img/` later.
-- Every painting shows its credit on a small frosted chip on the painting itself, above where the fade starts (the band's mask is solid to 40%; the credit block sits just above that): title (linked to its museum page), date, artist. The dots capsule sits under it, both left-aligned to the column. Inactive dots are full muted (about 6:1 on the glass); the current one is a longer ink capsule.
+- An endless stream: there is no fixed set and no count. Nothing repeats within a visit, and nothing on the page shows a position or a total (the old dots are retired; do not bring them back).
+- Sources: three open-access museum collections, all keyless and all public domain or CC0 only. Art Institute of Chicago (`is_public_domain`), Cleveland Museum of Art (`cc0`, `type=Painting`, `has_image`, created 1700 to 1925) and The Met (`isPublicDomain`, paintings, 1700 to 1925). Never pull from anywhere that isn't public domain or CC0.
+- The first painting comes from whichever source answers first (all three are asked at once). After that the sources take turns filling the queue in batches when it runs low (under 4), with random search terms and random pages so each visit differs. A source that fails three times in a row mostly rests. Each painting's image is dropped from memory once it has faded out.
+- Metadata filter, per source: landscapes with rural subjects (fields, rivers, countryside, cattle...), wide (1.25 to 2.4), dated 1700 to 1925, and nothing stormy, nocturnal, wintry, urban, at sea, religious or a portrait (AIC also needs a calm dominant colour: saturation 62 or less, lightness 28 to 88).
+- Calm check on the loaded image, before it is shown: landscape-shaped (1.2 to 2.6), and, when CORS allows sampling, mean chroma 0.36 or less and mean lightness 0.25 to 0.9. Anything that fails is skipped silently.
+- Fallbacks, used when no source answers within 2.5s, when every source fails, or after 8 skips in a row; live paintings take over as soon as one arrives: Constable "The Hay Wain", Constable "Stoke-by-Nayland" (in place of the Abby Matthews piece, which isn't public domain), Corot "River with a Distant Tower", Corot "The Vire at Saint-Lô". All public domain, hosted on Wikimedia Commons (a different host from the live pull). They can be bundled into `img/` later.
+- Every painting shows its credit on a small frosted chip on the painting itself, above where the fade starts (the band's mask is solid to 40%; the credit block sits just above that): title (linked to its museum page), date, artist. It is left-aligned to the column, with the gold clock line just above it.
 - The painting never ends in a hard line: a mask dissolves it down the viewport, a faint sage/gold wash carries a little further, and a soft tint continues down the page behind Work and Experience before settling into flat paper.
-- A thin gold line above the credit is the clock: it fills once per painting (8s) and the next painting comes in when it finishes. Rotation and line pause together while the pointer or focus is on the credit or dots and while the tab is hidden. Under `prefers-reduced-motion` there is no rotation and no line (one random painting, dots still work).
+- A thin gold line above the credit is the clock: it fills once per painting (8s) and the next painting comes in when it finishes. Rotation and line pause together while the pointer or focus is on the credit and while the tab is hidden. Under `prefers-reduced-motion` there is no rotation and no line: one random painting per visit, with its credit.
 
 ## Adaptive theme
 
@@ -105,13 +107,13 @@ The only motion on the site:
 
 Curves: Apple's ease-out, `cubic-bezier(0,0,.58,1)`, for fades and the letterbox (`--ease-apple`), and a gentle spring (response 0.5s, damping 0.82, about 1% overshoot, as CSS `linear()`) for the camera lean and the row chevron (`--spring`).
 
-Everything else is static. No GSAP, no Lenis, no JS-driven scroll effects, no parallax beyond the band's dolly, no magnetic hover, no blinking/live dots, no typing or loading animations, no hover transitions. 4 and 5 only run where `animation-timeline` is supported; all of it is off under `prefers-reduced-motion: reduce`, and nothing is ever left hidden.
+Everything else is static. No GSAP, no Lenis, no JS-driven scroll effects, no parallax beyond the band's dolly, no magnetic hover, no blinking/live dots, no counters or progress dots, no typing or loading animations, no hover transitions. 4 and 5 only run where `animation-timeline` is supported; all of it is off under `prefers-reduced-motion: reduce`, and nothing is ever left hidden.
 
 ## Files
 
 - `index.html`: markup, including the opening and letterbox, the Horizon band and its atmosphere layers, the palette section and the car SVG, plus the small head script that decides whether the opening plays.
 - `styles.css`: all styling for both pages, the registered theme colours, the band's mask/wash/tint, and the crossfades.
-- `horizon.js`: the band: live AIC pull, fallbacks, queue, crossfade, credit, dots, palette sampling and theme, plus per-painting drift, rack focus, letterbox squeeze, glass sheen and the gold-line clock.
+- `horizon.js`: the band: the endless stream (AIC, Cleveland and Met sources, dedupe, calm check), fallbacks, crossfade, credit, palette sampling and theme, plus per-painting drift, rack focus, letterbox squeeze, glass sheen and the gold-line clock.
 - `cinema.js`: ending or skipping the opening credits, and the pointer lean.
 - `site.js`: social icons, scripted chat + optional AI endpoint (`CHAT_ENDPOINT`), the perimeter car lap, row preview tap/click toggling.
 - `circuit.html` + `circuit.js`: the draw-a-circuit page and its lap sim.

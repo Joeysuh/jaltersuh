@@ -1,14 +1,17 @@
 (function () {
   "use strict";
 
-  /* Horizon band. Pulls public-domain pastoral landscapes live from the Art
-     Institute of Chicago API, shows one at random, then walks the rest in a
-     shuffled no-repeat queue (reshuffled when exhausted). Every painting
-     re-tints the page: a palette is sampled from the image and written to the
-     CSS variables, which crossfade (styles.css). Falls back to four
-     public-domain paintings on Wikimedia Commons if the API fails or is slow. */
+  /* Horizon band: an endless stream of public-domain pastoral paintings.
+     Three open-access museum collections feed it (Art Institute of Chicago,
+     Cleveland Museum of Art, The Met), no keys needed. Batches are pulled in
+     turn as the queue runs low, shuffled together, and nothing repeats within
+     a visit. Metadata filters keep it to calm rural landscapes, and every
+     image is checked again once loaded (shape, saturation, lightness) before
+     it is shown. Each painting re-tints the page from a sampled palette.
+     Four public-domain paintings on Wikimedia Commons stand in whenever the
+     collections fail or are slow. */
 
-  var ROTATE_MS = 8000, FADE_MS = 800, API_WAIT_MS = 2500, IMG_WAIT_MS = 8000, POOL_SIZE = 8;
+  var ROTATE_MS = 8000, FADE_MS = 800, API_WAIT_MS = 2500, FETCH_MS = 7000, IMG_WAIT_MS = 8000, LOW_WATER = 4;
 
   var band = document.querySelector("[data-horizon]");
   if (!band) return;
@@ -18,7 +21,6 @@
   var fill = band.querySelector(".timeline i");
   var bars = document.querySelectorAll(".letterbox .bar");
   var creditEl = band.querySelector("[data-credit]");
-  var dotsEl = band.querySelector("[data-dots]");
   var themeMeta = document.querySelector('meta[name="theme-color"]');
   var still = window.matchMedia("(prefers-reduced-motion: reduce)");
   var dusk = window.matchMedia("(prefers-color-scheme: dark)");
@@ -50,57 +52,106 @@
       pal: ["#e9e5d6", "#262a21", "#8f9b72", "#c2a464"] }
   ];
 
-  /* ------------------------------------------------------------ live pull
-     One search request per page load. The query only asks for public-domain
-     works; everything else is filtered here so nothing garish lands:
-     paintings only, tagged as landscapes, wide, calm dominant colour, made
-     between 1700 and 1925, and nothing stormy, nocturnal, urban or at sea. */
-  var TERMS = ["pastoral landscape", "landscape river", "meadow landscape", "landscape cattle",
-               "countryside landscape", "landscape fields", "river valley", "farm landscape", "hay harvest"];
-  var FIELDS = "id,title,artist_title,date_display,image_id,thumbnail,color,artwork_type_title,subject_titles,term_titles,style_titles";
+  /* ------------------------------------------------------------ sources
+     Each source returns a batch of paintings shaped
+     { key, title, artist, date, src, href }. A source that errors or is slow
+     just contributes nothing this round. */
   var LAND = /landscape|pastoral/i;
   var RURAL = /river|stream|meadow|pasture|field|countryside|farm|valley|cattle|cow|sheep|hay|harvest|rural|village|pond|hill/i;
-  var AVOID = /battle|war\b|storm|wreck|fire|burning|night|moon|winter|snow|portrait|nude|crucifi|martyr|death|interior|still life|street|city|harbo|seascape|marine|\bsea\b|abstract|ruin/i;
+  var AVOID = /battle|war\b|storm|wreck|fire|burning|night|moon|winter|snow|portrait|nude|crucifi|martyr|death|interior|still life|street|city|harbo|seascape|marine|\bsea\b|abstract|ruin|\bvirgin\b|\bsaint\b(?!-)|\bchrist\b|madonna|\bholy\b/i;
+  function yearOk(y) { return !y || (y >= 1700 && y <= 1925); }
+  function firstYear(t) { return +(((t || "").match(/1[6-9]\d\d/) || [0])[0]); }
+  function wideEnough(w, h) { var r = w / h; return r >= 1.25 && r <= 2.4; }
 
-  function fits(a) {
+  function getJSON(url) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var t = setTimeout(function () { if (ctrl) ctrl.abort(); }, FETCH_MS);
+    return Promise.race([
+      fetch(url, ctrl ? { signal: ctrl.signal } : {}),
+      new Promise(function (_, no) { setTimeout(function () { no(new Error("slow")); }, FETCH_MS); })
+    ]).then(function (r) { clearTimeout(t); if (!r.ok) throw new Error("http " + r.status); return r.json(); });
+  }
+
+  /* Art Institute of Chicago: public-domain search, random term and page */
+  var AIC_TERMS = ["pastoral landscape", "landscape river", "meadow landscape", "landscape cattle",
+                   "countryside landscape", "landscape fields", "river valley", "farm landscape", "hay harvest"];
+  var AIC_FIELDS = "id,title,artist_title,date_display,image_id,thumbnail,color,artwork_type_title,subject_titles,term_titles,style_titles";
+  function aicFits(a) {
     if (!a || !a.image_id || !a.thumbnail || !a.thumbnail.width || !a.thumbnail.height) return false;
     if (a.artwork_type_title !== "Painting") return false;
     var tags = [a.title].concat(a.subject_titles || [], a.term_titles || [], a.style_titles || []).join(" | ");
     if (!LAND.test(tags) || !RURAL.test(tags)) return false;
     if (AVOID.test(a.title + " | " + (a.subject_titles || []).join(" | "))) return false;
-    var r = a.thumbnail.width / a.thumbnail.height;
-    if (r < 1.25 || r > 2.4) return false;
+    if (!wideEnough(a.thumbnail.width, a.thumbnail.height)) return false;
     var c = a.color;
     if (c && (c.s > 62 || c.l < 28 || c.l > 88)) return false;
-    var y = +(((a.date_display || "").match(/1[6-9]\d\d/) || [0])[0]);
-    if (y && (y < 1700 || y > 1925)) return false;
-    return true;
+    return yearOk(firstYear(a.date_display));
   }
-
-  function pull() {
-    var url = "https://api.artic.edu/api/v1/artworks/search?q=" + encodeURIComponent(pick(TERMS)) +
-      "&query%5Bterm%5D%5Bis_public_domain%5D=true&fields=" + FIELDS + "&limit=100";
-    var ctrl = window.AbortController ? new AbortController() : null;
-    var slow = setTimeout(function () { if (ctrl) ctrl.abort(); }, API_WAIT_MS);
-    return Promise.race([
-      fetch(url, ctrl ? { signal: ctrl.signal } : {}),
-      new Promise(function (_, no) { setTimeout(function () { no(new Error("slow")); }, API_WAIT_MS); })
-    ]).then(function (r) {
-      if (!r.ok) throw new Error("api " + r.status);
-      return r.json();
-    }).then(function (j) {
-      clearTimeout(slow);
+  function aic() {
+    var url = "https://api.artic.edu/api/v1/artworks/search?q=" + encodeURIComponent(pick(AIC_TERMS)) +
+      "&query%5Bterm%5D%5Bis_public_domain%5D=true&fields=" + AIC_FIELDS + "&limit=60&page=" + (1 + Math.floor(Math.random() * 3));
+    return getJSON(url).then(function (j) {
       var iiif = (j.config && j.config.iiif_url) || "https://www.artic.edu/iiif/2";
       var w = window.innerWidth * (window.devicePixelRatio || 1) > 1200 ? 1686 : 843;
-      var list = (j.data || []).filter(fits).map(function (a) {
-        return { title: a.title, artist: a.artist_title || "Unknown artist", date: a.date_display || "",
-                 src: iiif + "/" + a.image_id + "/full/" + w + ",/0/default.jpg",
-                 href: "https://www.artic.edu/artworks/" + a.id };
+      return (j.data || []).filter(aicFits).map(function (a) {
+        return { key: "aic:" + a.id, title: a.title, artist: a.artist_title || "Unknown artist", date: a.date_display || "",
+                 src: iiif + "/" + a.image_id + "/full/" + w + ",/0/default.jpg", href: "https://www.artic.edu/artworks/" + a.id };
       });
-      if (list.length < 4) throw new Error("too few");
-      return shuffle(list).slice(0, POOL_SIZE);
     });
   }
+
+  /* Cleveland Museum of Art: CC0 paintings with a web image, 1700 to 1925 */
+  var CMA_TERMS = ["landscape", "pastoral", "river landscape", "countryside", "meadow", "cattle", "farm", "valley"];
+  var cmaTotal = {};
+  function cmaFits(a) {
+    var web = a && a.images && a.images.web;
+    if (!web || !web.url || !wideEnough(+web.width, +web.height)) return false;
+    if (a.share_license_status && a.share_license_status !== "CC0") return false;
+    if (AVOID.test(a.title || "")) return false;
+    return yearOk(firstYear(a.creation_date));
+  }
+  function cmaArtist(cs) { var d = (cs && cs[0] && cs[0].description) || ""; return d.split(" (")[0] || "Unknown artist"; }
+  function cma() {
+    var term = pick(CMA_TERMS), total = cmaTotal[term], skip = total ? Math.floor(Math.random() * Math.max(1, total - 40)) : 0;
+    var url = "https://openaccess-api.clevelandart.org/api/artworks/?q=" + encodeURIComponent(term) +
+      "&type=Painting&cc0&has_image=1&created_after=1700&created_before=1925&limit=40&skip=" + skip;
+    return getJSON(url).then(function (j) {
+      if (j.info && j.info.total) cmaTotal[term] = j.info.total;
+      return (j.data || []).filter(cmaFits).map(function (a) {
+        return { key: "cma:" + a.id, title: a.title, artist: cmaArtist(a.creators), date: a.creation_date || "",
+                 src: a.images.web.url, href: a.url };
+      });
+    });
+  }
+
+  /* The Met: search once per term for painting IDs, then open a few at a time */
+  var MET = "https://collectionapi.metmuseum.org/public/collection/v1";
+  var MET_TERMS = ["landscape", "pastoral", "river landscape", "countryside", "cattle"];
+  var metIds = [];
+  function metFits(o) {
+    if (!o || !o.isPublicDomain || !o.primaryImageSmall || !/paint/i.test(o.classification || "")) return false;
+    var tags = (o.tags || []).map(function (t) { return t.term; }).join(" | ");
+    if (!LAND.test(o.title + " | " + tags) && !RURAL.test(o.title + " | " + tags)) return false;
+    if (AVOID.test(o.title + " | " + tags)) return false;
+    return yearOk(o.objectBeginDate);
+  }
+  function met() {
+    var ids = metIds.length ? Promise.resolve(metIds) :
+      getJSON(MET + "/search?hasImages=true&medium=Paintings&dateBegin=1700&dateEnd=1925&q=" + encodeURIComponent(pick(MET_TERMS)))
+        .then(function (j) { metIds = shuffle((j.objectIDs || []).slice(0, 400)); return metIds; });
+    return ids.then(function () {
+      var batch = [];
+      while (batch.length < 8 && metIds.length) { var id = metIds.pop(); if (!seen["met:" + id]) batch.push(id); }
+      return Promise.all(batch.map(function (id) { return getJSON(MET + "/objects/" + id).catch(function () { return null; }); }));
+    }).then(function (objs) {
+      return objs.filter(metFits).map(function (o) {
+        return { key: "met:" + o.objectID, title: o.title, artist: o.artistDisplayName || "Unknown artist", date: o.objectDate || "",
+                 src: o.primaryImageSmall, href: o.objectURL };
+      });
+    });
+  }
+
+  var SOURCES = [aic, cma, met];
 
   /* ------------------------------------------------------------- helpers */
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
@@ -159,8 +210,11 @@
       var d = x.getImageData(0, 0, w, h).data, px = [];
       for (var i = 0; i < d.length; i += 4) { var p = [d[i], d[i + 1], d[i + 2]]; p.L = lum(p); p.hsl = rgb2hsl(p); px.push(p); }
       px.sort(function (a, b) { return a.L - b.L; });
-      var k = Math.max(1, Math.floor(px.length * .08));
+      var k = Math.max(1, Math.floor(px.length * .08)), ms = 0, ml = 0;
+      px.forEach(function (p) { ms += (Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2])) / 255; ml += p.hsl[2]; });
       return {
+        chroma: ms / px.length,   /* mean colourfulness; unlike HSL saturation it doesn't swell in dark varnish */
+        lit: ml / px.length,
         light: mean(px.slice(px.length - k)),
         dark: mean(px.slice(0, k)),
         sage: mean(px.filter(function (p) { return p.hsl[0] >= 60 && p.hsl[0] <= 170 && p.hsl[1] >= .1 && p.hsl[2] > .15 && p.hsl[2] < .85; })),
@@ -195,7 +249,7 @@
 
   function paletteFor(p, im) {
     if (p.theme) return p.theme;
-    var s = p.cors ? sample(im) : null;
+    var s = p.sampled !== undefined ? p.sampled : (p.cors ? sample(im) : null);
     if (!s || !s.light || !s.dark) {
       var f = p.pal || ["#ebe7dc", "#262b22", "#8e9a68", "#c4a35f"];
       s = { light: hex2rgb(f[0]), dark: hex2rgb(f[1]), sage: hex2rgb(f[2]), gold: hex2rgb(f[3]) };
@@ -246,8 +300,51 @@
     return p.loading;
   }
 
-  /* ---------------------------------------------------------- the rotation */
-  var pool = [], queue = [], cur = -1, front = null, run = null, held = false, live = false;
+  /* ---------------------------------------------------------- the stream */
+  var queue = [], seen = {}, current = null, front = null, run = null, held = false, live = false;
+  var turn = 0, filling = null, strikes = [0, 0, 0];
+
+  function enqueue(list) {
+    var fresh = (list || []).filter(function (p) { return p && !seen[p.key]; });
+    fresh.forEach(function (p) { seen[p.key] = true; });
+    if (fresh.length && !live) { live = true; queue = queue.filter(function (p) { return !p.fallback; }); }   /* live paintings replace stand-ins */
+    queue = shuffle(queue.concat(fresh));
+    return fresh.length;
+  }
+  /* ask the next source in turn for a batch; a source that keeps failing mostly rests */
+  function refill() {
+    if (filling) return filling;
+    var tries = 0;
+    function attempt() {
+      if (tries++ >= SOURCES.length) return Promise.resolve(0);
+      var k = turn++ % SOURCES.length;
+      if (strikes[k] >= 3 && Math.random() > 0.2) return attempt();
+      return SOURCES[k]().then(function (list) { strikes[k] = 0; return enqueue(list); },
+                               function () { strikes[k]++; return 0; })
+        .then(function (n) { return n || attempt(); });
+    }
+    filling = attempt().then(function (n) { filling = null; return n; });
+    return filling;
+  }
+  function standIns() {
+    return shuffle(FALLBACKS.map(function (f, i) { var q = { key: "wm:" + i, fallback: true }; for (var k in f) q[k] = f[k]; return q; })
+      .filter(function (p) { return !current || p.key !== current.key; }));
+  }
+  function next() {
+    if (queue.length) return Promise.resolve(queue.shift());
+    return refill().then(function () { if (!queue.length) queue = standIns(); return queue.shift(); });
+  }
+  function topUp() { if (queue.length < LOW_WATER) refill(); }
+
+  /* the last check, on the loaded image itself: landscape-shaped, calm colour, not too dark or blown out */
+  function calm(p, im) {
+    if (p.fallback) return true;
+    var r = im.naturalWidth / im.naturalHeight;
+    if (!(r >= 1.2 && r <= 2.6)) return false;
+    p.sampled = p.cors ? sample(im) : null;
+    var s = p.sampled;
+    return !s || (s.chroma <= .36 && s.lit >= .25 && s.lit <= .9);
+  }
 
   /* director's cut: each painting drifts one way (never the same way twice in a row) */
   var DRIFTS = [["-0.9%", "-0.45%"], ["0.9%", "-0.45%"], ["-0.8%", "0.45%"], ["0.8%", "0.45%"], ["0%", "-0.7%"], ["-1%", "0%"], ["1%", "0%"]];
@@ -274,63 +371,50 @@
                   { duration: 1800, delay: 900, easing: "cubic-bezier(.45,0,.25,1)" });
   }
 
-  function good() { return pool.filter(function (p) { return !p.bad; }).length; }
-  function reseed(exclude) {
-    queue = shuffle(pool.map(function (_, k) { return k; }).filter(function (k) { return k !== exclude && !pool[k].bad; }));
-  }
-  function nextIndex() {
-    for (var tries = 0; tries < 2; tries++) {
-      while (queue.length) { var i = queue.shift(); if (!pool[i].bad) return i; }
-      reseed(cur);
-    }
-    return -1;
-  }
-  function preloadNext() { if (queue.length) load(pool[queue[0]]).catch(function () {}); }
-
-  function show(i) {
-    var p = pool[i];
+  function show(p) {
     return load(p).then(function (im) {
-      if (pool[i] !== p) return;
+      if (!calm(p, im)) { p.img = null; throw new Error("not calm"); }
       var t = paletteFor(p, im);
       im.className = "";
       drift(im);
       art.appendChild(im);                       /* newest sits on top and fades in over the old one */
       void im.offsetWidth;
       im.classList.add("is-on");
-      var old = front;
+      var old = front, oldP = current;
       front = im;
+      current = p;
       if (old && old !== im) {
         old.classList.add("out");                /* rack focus: the outgoing print softens as the new one lands */
         squeeze();
-        setTimeout(function () { if (old !== front && old.parentNode) old.parentNode.removeChild(old); }, still.matches ? 0 : FADE_MS + 100);
+        setTimeout(function () {
+          if (old !== front && old.parentNode) old.parentNode.removeChild(old);
+          if (oldP && !oldP.fallback) oldP.img = null;   /* an endless stream shouldn't keep every image in memory */
+        }, still.matches ? 0 : FADE_MS + 100);
       }
       glint();
-      cur = i;
       credit(p);
-      pool.forEach(function (q, k) { if (q.dot) q.dot.setAttribute("aria-pressed", String(k === i)); });
       retint(t);
     });
   }
 
-  function fail(i) {
-    pool[i].bad = true;
-    if (pool[i].dot) { pool[i].dot.parentNode.removeChild(pool[i].dot); pool[i].dot = null; }
-    if (live && !good()) { live = false; start(shuffle(FALLBACKS.slice())); return false; }   /* live images all failed */
-    return good() > 0;
-  }
-
-  function advance() {
-    var i = nextIndex();
-    if (i < 0) return;
-    show(i).then(function () { preloadNext(); schedule(); }, function () { if (fail(i)) advance(); });
+  /* show the next painting; skip any that fail to load or fail the calm check */
+  function advance(misses) {
+    misses = misses || 0;
+    next().then(function (p) {
+      return show(p).then(function () { if (queue[0]) load(queue[0]).catch(function () {}); topUp(); schedule(); },
+        function () { if (misses < 8) advance(misses + 1); else { queue = standIns().concat(queue); advance(0); } });
+    });
   }
 
   /* The thin gold line is the clock: it fills once per painting and the
      next painting comes in when it finishes, so pausing one pauses both. */
-  function stopClock() { if (run) { run.onfinish = null; run.cancel(); run = null; } }
+  function stopClock() {
+    if (run) { run.onfinish = null; run.cancel(); run = null; }
+    if (fill && fill.getAnimations) fill.getAnimations().forEach(function (a) { a.cancel(); });   /* finished lines would otherwise pile up over an endless visit */
+  }
   function schedule() {
     stopClock();
-    if (still.matches || good() < 2 || !fill || !fill.animate) return;
+    if (still.matches || !fill || !fill.animate) return;
     run = fill.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: ROTATE_MS, easing: "linear", fill: "forwards" });
     run.onfinish = function () { run = null; advance(); };
     if (document.hidden || held) run.pause();
@@ -346,35 +430,8 @@
     creditEl.appendChild(document.createTextNode((p.date ? ", " + p.date : "") + " · " + p.artist));
   }
 
-  function dots() {
-    dotsEl.textContent = "";
-    pool.forEach(function (p, k) {
-      if (p.bad) return;
-      var b = document.createElement("button");
-      b.type = "button";
-      b.setAttribute("aria-label", p.title + ", " + p.artist);
-      b.setAttribute("aria-pressed", "false");
-      b.addEventListener("click", function () {
-        if (k === cur) return;
-        stopClock();
-        show(k).then(function () { reseed(k); preloadNext(); schedule(); },   /* a dot reseeds the queue */
-                     function () { if (fail(k)) schedule(); });
-      });
-      p.dot = b;
-      dotsEl.appendChild(b);
-    });
-  }
-
-  function start(list) {
-    pool = list.map(function (p) { var q = {}; for (var k in p) q[k] = p[k]; return q; });
-    dots();
-    var first = Math.floor(Math.random() * pool.length);  /* random first painting on every load */
-    reseed(first);
-    show(first).then(function () { preloadNext(); schedule(); }, function () { if (fail(first)) advance(); });
-  }
-
-  /* hold while the visitor is on the credit or the dots (not the whole band:
-     a cursor resting over the painting shouldn't freeze it) */
+  /* hold while the visitor is on the credit (not the whole band: a cursor
+     resting over the painting shouldn't freeze it) */
   var meta = band.querySelector(".horizon-meta");
   meta.addEventListener("pointerenter", function () { hold(true); });
   meta.addEventListener("pointerleave", function () { hold(false); });
@@ -383,6 +440,12 @@
   document.addEventListener("visibilitychange", function () { if (!run) return; if (document.hidden) run.pause(); else if (!held) run.play(); });
   (still.addEventListener ? still.addEventListener.bind(still, "change") : still.addListener.bind(still))(schedule);
 
-  pull().then(function (list) { live = true; start(list); },
-              function () { start(shuffle(FALLBACKS.slice())); });
+  /* first painting: ask every source at once and take a random one from
+     whichever answers first; stand-ins if none answers within 2.5s */
+  var started = false;
+  function begin() { if (started) return; started = true; advance(); }
+  SOURCES.forEach(function (src, k) {
+    src().then(function (list) { if (enqueue(list)) begin(); }, function () { strikes[k]++; });
+  });
+  setTimeout(function () { if (!started) { if (!queue.length) queue = standIns(); begin(); } }, API_WAIT_MS);
 })();
