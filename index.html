@@ -12,7 +12,8 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@300..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&text=Joey&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -50,22 +51,22 @@
 
   <section aria-labelledby="work-h">
     <h2 class="label" id="work-h">Work</h2>
-    <ol class="list">
-      <li><span class="t">Bare-metal RTOS</span><span class="m">STM32</span></li>
-      <li><span class="t">ALIVE</span><span class="m">Capstone</span></li>
-      <li><span class="t">BitWave accelerator</span><span class="m">RTL</span></li>
-      <li><span class="t">Multi-precision dot product</span><span class="m">RTL</span></li>
-      <li><span class="t">FPGA matrix-vector multiplier</span><span class="m">FPGA</span></li>
+    <ol class="list list-tight">
+      <li tabindex="0" aria-describedby="peek-w1"><span class="t">Bare-metal RTOS</span><span class="m">STM32</span><span class="peek" id="peek-w1">My RTOS runs on an STM32F401RE with no vendor OS. It schedules by earliest deadline first and has its own heap allocator with corruption checks.</span></li>
+      <li tabindex="0" aria-describedby="peek-w2"><span class="t">ALIVE</span><span class="m">Capstone</span><span class="peek" id="peek-w2">A wearable that drives an adaptive Unreal Engine 5 game. I built the sensing unit, an STM32 and ESP32 reading pulse, motion and skin response.</span></li>
+      <li tabindex="0" aria-describedby="peek-w3"><span class="t">BitWave accelerator</span><span class="m">RTL</span><span class="peek" id="peek-w3">A team build of an accelerator paper. I own memory and integration: SRAM in SystemVerilog, verified with cocotb against a Python model.</span></li>
+      <li tabindex="0" aria-describedby="peek-w4"><span class="t">Multi-precision dot product</span><span class="m">RTL</span><span class="peek" id="peek-w4">A 16-lane dot-product unit from FP16 down to MXFP8 and UINT8, bit-exact against a Python replica.</span></li>
+      <li tabindex="0" aria-describedby="peek-w5"><span class="t">FPGA matrix-vector multiplier</span><span class="m">FPGA</span><span class="peek" id="peek-w5">A pipelined matrix-vector multiplier with eight parallel lanes in SystemVerilog.</span></li>
     </ol>
   </section>
 
   <section aria-labelledby="exp-h">
     <h2 class="label" id="exp-h">Experience</h2>
-    <ol class="list">
-      <li><span class="t">Tesla</span><span class="m">Now</span></li>
-      <li><span class="t">Harbinger Motors</span><span class="m">Firmware</span></li>
-      <li><span class="t">Ford</span><span class="m">ECU software</span></li>
-      <li><span class="t">Waterloo FSAE</span><span class="m">BMU firmware</span></li>
+    <ol class="list list-airy">
+      <li tabindex="0" aria-describedby="peek-e1"><span class="t">Tesla</span><span class="m">Now</span><span class="peek" id="peek-e1">I'm at Tesla right now.</span></li>
+      <li tabindex="0" aria-describedby="peek-e2"><span class="t">Harbinger Motors</span><span class="m">Firmware</span><span class="peek" id="peek-e2">I validated over-the-air firmware updates and worked on DoCAN and DoIP diagnostics, MACsec and the TCU.</span></li>
+      <li tabindex="0" aria-describedby="peek-e3"><span class="t">Ford</span><span class="m">ECU software</span><span class="peek" id="peek-e3">A multi-threaded ECU simulation, lots of deadlock debugging, plus CAN and DoIP diagnostics.</span></li>
+      <li tabindex="0" aria-describedby="peek-e4"><span class="t">Waterloo FSAE</span><span class="m">BMU firmware</span><span class="peek" id="peek-e4">Hardware- and software-in-the-loop bring-up and battery management unit firmware.</span></li>
     </ol>
   </section>
 

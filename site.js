@@ -41,6 +41,20 @@
     });
   })();
 
+  /* ------------------------------------------------- row previews (tap / click)
+     Wide screens show a row's preview on hover; everywhere a click or tap
+     toggles it, one row at a time. Escape closes. */
+  (function () {
+    var rows = document.querySelectorAll(".list li[aria-describedby]");
+    function closeAll(except) { rows.forEach(function (r) { if (r !== except) r.classList.remove("is-open"); }); }
+    rows.forEach(function (r) {
+      r.addEventListener("click", function () { var open = !r.classList.contains("is-open"); closeAll(r); r.classList.toggle("is-open", open); });
+      r.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); r.click(); } });
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(null); });
+    document.addEventListener("click", function (e) { if (!e.target.closest || !e.target.closest(".list li")) closeAll(null); });
+  })();
+
   /* ------------------------------------------------------------------ socials
      Icons: GitHub from simple-icons (CC0); LinkedIn and X from Font Awesome
      Free brands (CC BY 4.0, https://fontawesome.com/license/free). */

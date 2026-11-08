@@ -13,6 +13,7 @@
   --accent:#e31937;
   --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --serif:"Newsreader",ui-serif,Georgia,serif;   /* the nameplate only */
   --col:600px; --gap:44px; --pad:20px;
   color-scheme:light;
 }
@@ -68,7 +69,8 @@ html.home body{background:linear-gradient(to bottom,
 @media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
 
 /* ---- intro ---- */
-.intro h1{margin:0;font-size:1.375rem;line-height:1.3;font-weight:500;letter-spacing:-.01em}
+/* one contrasting serif accent: the nameplate, nothing else */
+.intro h1{margin:0;font-family:var(--serif);font-size:1.625rem;line-height:1.2;font-weight:500;letter-spacing:-.005em;font-optical-sizing:auto}
 .lede{margin:.25rem 0 0;color:var(--muted)}
 
 .socials{display:flex;gap:4px;margin:-8px 0 -8px -9px;padding:0;list-style:none}
@@ -87,7 +89,8 @@ html.home body{background:linear-gradient(to bottom,
 
 .ask{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--fg);padding-bottom:1px}
 .ask:focus-within{border-bottom-width:2px;padding-bottom:0}
-.ask input{flex:1;min-width:0;padding:8px 0;border:0;border-radius:0;background:none;color:var(--fg);font:inherit;font-size:1rem}
+/* Notion text-input calibration: 16/24 type in a 44px field */
+.ask input{flex:1;min-width:0;padding:10px 0;line-height:24px;border:0;border-radius:0;background:none;color:var(--fg);font:inherit;font-size:1rem}
 .ask input::placeholder{color:var(--muted);opacity:1}
 .ask input:focus{outline:none}
 .send{display:grid;place-items:center;flex:none;width:36px;height:36px;margin-right:-8px;padding:0;border:0;background:none;color:var(--accent);cursor:pointer}
@@ -96,11 +99,30 @@ html.home body{background:linear-gradient(to bottom,
 .note{margin:8px 0 0;font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
 
 /* ---- work + experience ---- */
-.label{margin:0 0 4px;font-family:var(--mono);font-size:.75rem;font-weight:400;color:var(--muted)}
+/* Notion calibration: 16/24 rows on a 4px grid, 8px under the label, hairline dividers.
+   Taste density: Work a little tighter (41px rows), Experience a little airier (53px). */
+.label{margin:0 0 8px;font-family:var(--mono);font-size:.75rem;line-height:16px;font-weight:400;color:var(--muted)}
 .list{margin:0;padding:0;list-style:none}
-.list li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.list-tight{--row-pad:8px}
+.list-airy{--row-pad:14px}
+.list li{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;column-gap:16px;
+  padding:var(--row-pad,10px) 0;line-height:24px;border-bottom:1px solid var(--rule)}
 .list li:last-child{border-bottom:0}
+.list li:focus{outline:none}
+.list li:focus-visible{outline:2px solid var(--fg);outline-offset:4px}
 .m{flex:none;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.list .m{line-height:16px;white-space:nowrap}
+
+/* index-style previews: beside the row on wide screens (hover or keyboard focus),
+   under it on tap everywhere else. The rows themselves don't change. Copy comes from the chat. */
+.peek{display:none;font-size:.8125rem;line-height:1.5;color:var(--muted);text-wrap:pretty}
+@media (hover:hover) and (min-width:1240px){
+  .peek{position:absolute;left:calc(100% + 40px);top:var(--row-pad,10px);width:240px;padding-top:8px;border-top:1px solid var(--rule)}
+  .list li:hover .peek,.list li:focus-visible .peek,.list li.is-open .peek{display:block}
+}
+@media not all and (hover:hover) and (min-width:1240px){
+  .list li.is-open .peek,.list li:focus-visible .peek{display:block;flex-basis:100%;padding:6px 0 2px}
+}
 /* ---- palette: the current painting's colours, live ---- */
 .palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px;margin:8px 0 0;padding:0;list-style:none}
 .palette li{display:grid;grid-template-columns:18px 1fr;column-gap:10px;align-items:center;min-width:0}
@@ -135,6 +157,25 @@ html.home body{background:linear-gradient(to bottom,
   .horizon-art img{transition:opacity 1.6s ease}
   html.home{transition:--bg 1.4s ease,--fg 1.4s ease,--muted 1.4s ease,--rule 1.4s ease,--sage 1.4s ease,--gold 1.4s ease}
 }
+/* kinetic type and line reveals: pure CSS scroll timelines, calm ranges.
+   Browsers without scroll timelines, and reduced motion, get the static page. */
+@supports (animation-timeline:scroll()){
+  @media (prefers-reduced-motion:no-preference){
+    .intro h1{animation:nameplate linear both;animation-timeline:scroll(root);animation-range:0 70vh}
+    .label{animation:label-weight linear both,line-in linear both;animation-timeline:view(),view();animation-range:entry 0% cover 45%,entry 0% cover 12%}
+    .list .t,.list .m,.palette li,.foot > *{animation:line-in linear both;animation-timeline:view();animation-range:entry 0% cover 12%}
+    .foot > *{animation-range:entry 0% entry 100%}   /* the page ends here, so finish as soon as it is fully in view */
+  }
+}
+@keyframes nameplate{from{font-weight:560}to{font-weight:400}}
+@keyframes label-weight{from{font-weight:300}to{font-weight:500}}
+@keyframes line-in{from{opacity:0;transform:translateY(.4em);clip-path:inset(100% 0 0 0)}to{opacity:1;transform:none;clip-path:inset(0)}}
+
+/* tactile grain: barely-there paper noise over the home page */
+html.home body::after{content:"";position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.07;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){html.home body::after{mix-blend-mode:soft-light;opacity:.1}}
+
 @media (prefers-reduced-motion:reduce){
   .drive{display:none}
 }
