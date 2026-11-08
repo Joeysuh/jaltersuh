@@ -19,10 +19,11 @@
   --ease-apple:cubic-bezier(0,0,.58,1);
   --spring:linear(0,0.0697,0.2211,0.3947,0.5578,0.6951,0.8024,0.881,0.9355,0.971,0.9924,1.0042,1.0096,1.0111,1.0105,1.0088,1.0069,1.0051,1.0035,1.0023,1.0014,1.0008,1.0004,1.0001,1);
   /* glass: a finish on a few small surfaces only; the page itself stays paper */
-  --glass:color-mix(in srgb,var(--bg) 66%,transparent);
-  --glass-edge:color-mix(in srgb,var(--fg) 11%,transparent);
-  --glass-blur:blur(20px) saturate(1.5);
-  --glass-shadow:inset 0 1px 0 color-mix(in srgb,#fff 50%,transparent),0 10px 28px -16px color-mix(in srgb,var(--fg) 42%,transparent);
+  /* fixed warm white, never re-tinted by the painting */
+  --glass:rgba(251,248,241,.88);
+  --glass-edge:rgba(58,48,30,.12);
+  --glass-blur:blur(20px);
+  --glass-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 10px 28px -16px rgba(40,34,22,.32);
   color-scheme:light;
 }
 
@@ -39,6 +40,9 @@ button{font:inherit;color:inherit}
 
 /* ---- home theme: painting-driven, with a dusk version in dark mode ---- */
 html.home{--sage:#9aa27c;--gold:#c8a45e;color-scheme:light dark}
+@media (prefers-color-scheme:dark){
+  html.home{--glass:rgba(30,30,34,.86);--glass-edge:rgba(255,248,235,.12);--glass-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px -16px rgba(0,0,0,.6)}
+}
 @media (prefers-color-scheme:dark){
   html.home{--bg:#151a28;--fg:#ece5d6;--muted:#a3a7b3;--rule:#2d3346;--sage:#56613f;--gold:#7f6b3f}
 }
@@ -63,7 +67,7 @@ html.home body{background:linear-gradient(to bottom,
              radial-gradient(80% 50% at 82% 62%,color-mix(in srgb,var(--gold) 20%,transparent),transparent 70%);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%);
           mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%)}
-.horizon-meta{position:absolute;left:0;right:0;bottom:30%;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+.horizon-meta{position:absolute;left:0;right:0;bottom:calc(60% + 12px);z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;
   max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;padding:0 var(--pad)}
 .credit,.dots{border:1px solid var(--glass-edge);border-radius:999px;background:var(--glass);
   -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-shadow)}
@@ -71,12 +75,12 @@ html.home body{background:linear-gradient(to bottom,
 .credit:empty{display:none}
 .credit a{display:inline-block;padding:14px 0;margin:-14px 0;color:var(--fg);text-decoration:none}
 .credit a:hover{text-decoration:underline;text-underline-offset:.25em}
-.dots{display:flex;align-items:center;height:32px;padding:0 4px;background:color-mix(in srgb,var(--bg) 48%,transparent)}   /* no text inside, so it can let more painting through */
+.dots{display:flex;align-items:center;height:32px;padding:0 4px}
 .dots:empty{display:none}
 /* 44px targets inside a 32px capsule (narrower only when eight dots must fit a phone) */
 .dots button{display:grid;place-items:center;width:min(44px,calc((100vw - 56px) / 8));height:44px;margin:-6px 0;padding:0;border:0;background:none;cursor:pointer}
-.dots button::before{content:"";width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--muted) 50%,transparent)}
-.dots button[aria-pressed="true"]::before{background:var(--fg)}
+.dots button::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--muted)}
+.dots button[aria-pressed="true"]::before{width:18px;background:var(--fg)}
 .horizon + .col{position:relative;z-index:1;padding-top:36px}   /* text always sits above the dollying band */
 @media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
 
@@ -85,7 +89,7 @@ html.home body{background:linear-gradient(to bottom,
 .horizon-cam{position:absolute;inset:0;transform:translate3d(calc(var(--lean-x,0) * -10px),calc(var(--lean-y,0) * -6px),0);transition:transform 1.2s var(--spring)}
 .horizon-frames{position:absolute;inset:0}
 .atmo{position:absolute;inset:0;pointer-events:none;display:none}
-.timeline{flex-basis:100%;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
+.timeline{align-self:stretch;flex-basis:auto;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
 .timeline i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:left}
 
 /* opening credits (first load per session): black, letterbox, the name resolving out of blur, then the bars slide away */
@@ -205,22 +209,21 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
 .clear:hover{color:var(--fg)}
 
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  :root{--glass:color-mix(in srgb,var(--bg) 92%,transparent)}
+  :root{--glass:rgba(251,248,241,.97)}
+  @media (prefers-color-scheme:dark){html.home{--glass:rgba(30,30,34,.96)}}
 }
 
 /* ---- motion ---- */
 @media (prefers-reduced-motion:no-preference){
-  /* painting crossfade 1.6s; theme crossfade 1.4s */
-  .horizon-art img{transition:opacity 1.6s var(--ease-apple),filter .9s var(--ease-apple)}
+  /* painting crossfade 0.8s; the page takes the new palette in one step, no wash */
+  .horizon-art img{transition:opacity .8s var(--ease-apple),filter .6s var(--ease-apple)}
   .list li::after{transition:transform .8s var(--spring)}
 
   /* Ken Burns: a very slow zoom and one drift per painting (direction set in horizon.js),
      with a tiny handheld settle as it lands; the outgoing print racks out of focus */
-  .horizon-frames img{animation:kb 12s cubic-bezier(.25,.1,.35,1) both,settle 1.8s ease-out both}
+  .horizon-frames img{animation:kb 22s cubic-bezier(.3,.1,.4,1) both,settle 2.4s ease-out both}
   .horizon-frames img.out{filter:blur(5px)}
   .atmo{display:block}
-  /* a whisper of projector flicker */
-  .flicker{background:#fff;mix-blend-mode:soft-light;opacity:0;animation:flicker 3.2s steps(1,end) infinite}
   /* the painting alive, at half strength: cloud shadows, a light ray, pollen, birds every 25s */
   .clouds{left:-100%;right:auto;width:300%;top:25%;
     background:radial-gradient(28% 40% at 20% 55%,rgba(20,24,18,.22),transparent 70%),radial-gradient(22% 34% at 62% 40%,rgba(20,24,18,.18),transparent 70%),radial-gradient(30% 38% at 88% 70%,rgba(20,24,18,.2),transparent 70%);
@@ -232,7 +235,6 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
   .birds path{transform-box:fill-box;transform-origin:center;animation:flap .9s ease-in-out infinite alternate}
   .birds path:nth-child(2n){animation-delay:-.45s}
   .sheen{left:-50%;right:-50%;background:linear-gradient(115deg,transparent 47%,rgba(255,255,255,.28) 50%,transparent 53%);mix-blend-mode:soft-light;opacity:0}
-  html.home{transition:--bg 1.4s var(--ease-apple),--fg 1.4s var(--ease-apple),--muted 1.4s var(--ease-apple),--rule 1.4s var(--ease-apple),--sage 1.4s var(--ease-apple),--gold 1.4s var(--ease-apple)}
 }
 /* kinetic type and line reveals: pure CSS scroll timelines, calm ranges.
    Browsers without scroll timelines, and reduced motion, get the static page. */
@@ -246,9 +248,8 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
     .foot > *{animation-range:entry 0% entry 100%}   /* the page ends here, so finish as soon as it is fully in view */
   }
 }
-@keyframes kb{from{scale:1.04;translate:0 0}to{scale:1.1;translate:var(--kb-x,0) var(--kb-y,0)}}
-@keyframes settle{0%{rotate:.16deg}30%{rotate:-.09deg}60%{rotate:.04deg}100%{rotate:0deg}}
-@keyframes flicker{0%{opacity:0}9%{opacity:.05}11%{opacity:.015}31%{opacity:.04}33%{opacity:0}58%{opacity:.03}61%{opacity:.01}83%{opacity:.045}86%{opacity:0}}
+@keyframes kb{from{scale:1.03;translate:0 0}to{scale:1.065;translate:var(--kb-x,0) var(--kb-y,0)}}
+@keyframes settle{0%{rotate:.07deg}40%{rotate:-.03deg}100%{rotate:0deg}}
 @keyframes clouds{from{transform:translateX(0)}to{transform:translateX(33.3333%)}}
 @keyframes ray{0%{opacity:0;transform:translateX(-25%)}20%{opacity:.55}55%{opacity:.55}75%,100%{opacity:0;transform:translateX(25%)}}
 @keyframes mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.55}50%{transform:translate(14px,-40px)}85%{opacity:.45}100%{opacity:0;transform:translate(-6px,-90px)}}

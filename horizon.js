@@ -8,7 +8,7 @@
      CSS variables, which crossfade (styles.css). Falls back to four
      public-domain paintings on Wikimedia Commons if the API fails or is slow. */
 
-  var ROTATE_MS = 5000, FADE_MS = 1600, API_WAIT_MS = 2500, IMG_WAIT_MS = 8000, POOL_SIZE = 8;
+  var ROTATE_MS = 8000, FADE_MS = 800, API_WAIT_MS = 2500, IMG_WAIT_MS = 8000, POOL_SIZE = 8;
 
   var band = document.querySelector("[data-horizon]");
   if (!band) return;
@@ -204,7 +204,13 @@
     return p.theme;
   }
 
+  /* The page takes the new palette in one step at the cut (no wash across the
+     page), and only while the reader is up at the band. Scrolled down to the
+     rows, the page keeps its colours; the newest palette waits for the next
+     cut seen at the top. */
   var theme = null;
+  function bandInView() { var r = band.getBoundingClientRect(); return r.bottom > window.innerHeight * 0.35 && r.top < window.innerHeight; }
+  function retint(t) { if (!theme || bandInView()) applyTheme(t); }
   function applyTheme(t) {
     theme = t || theme;
     if (!theme) return;
@@ -244,7 +250,7 @@
   var pool = [], queue = [], cur = -1, front = null, run = null, held = false, live = false;
 
   /* director's cut: each painting drifts one way (never the same way twice in a row) */
-  var DRIFTS = [["-1.8%", "-0.9%"], ["1.8%", "-0.9%"], ["-1.6%", "0.9%"], ["1.6%", "0.9%"], ["0%", "-1.4%"], ["-2%", "0%"], ["2%", "0%"]];
+  var DRIFTS = [["-0.9%", "-0.45%"], ["0.9%", "-0.45%"], ["-0.8%", "0.45%"], ["0.8%", "0.45%"], ["0%", "-0.7%"], ["-1%", "0%"], ["1%", "0%"]];
   var lastDrift = -1;
   function drift(im) {
     var d; do { d = Math.floor(Math.random() * DRIFTS.length); } while (d === lastDrift);
@@ -302,7 +308,7 @@
       cur = i;
       credit(p);
       pool.forEach(function (q, k) { if (q.dot) q.dot.setAttribute("aria-pressed", String(k === i)); });
-      applyTheme(t);
+      retint(t);
     });
   }
 

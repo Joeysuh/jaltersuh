@@ -32,7 +32,7 @@ Base values. On the home page they are re-tinted from the current painting (see 
 - Type scale, SF-style: nameplate 28 (Title 1, serif), body 17 for the lede, the ask field and row names, 15 for previews and chat lines, 13 for section labels, 12 for tags, credit, notes and the footer. Slight negative tracking (-0.01em) on 17px text.
 - Layout: one centered column, 560-640px wide (currently 600px), 35-50px gaps between blocks (currently 44px).
 - Every tap target is at least 44x44px (socials, send, dots, rows, credit and footer links), with the hit area extended invisibly where the visual is smaller.
-- Glass, as a finish on four small surfaces only: the ask box, the credit chip and the dots capsule over the painting, and the row preview cards. Frosted material: paper at 66% (the dots capsule 48%, it holds no text), backdrop blur 20px with saturate 1.5, a hairline edge, a top highlight and one soft shadow, radius 14px or a capsule. Without backdrop-filter support the glass goes nearly opaque. The page itself stays cream paper, never a glass sheet, and nothing else gets glass, boxes or shadows.
+- Glass, as a finish on four small surfaces only: the ask box, the credit chip and the dots capsule over the painting, and the row preview cards. The ask box over flat paper is the reference for how all of them read. Material: a fixed warm white, `rgba(251,248,241,.88)`, that never re-tints with the painting (dusk: `rgba(30,30,34,.86)`), backdrop blur 20px with no saturation boost, a fixed warm hairline edge, a top highlight and one soft shadow, radius 14px or a capsule. Without backdrop-filter support the glass goes nearly opaque. The page itself stays cream paper, never a glass sheet, and nothing else gets glass, boxes or shadows.
 - Gradients exist only in the band: its dissolve mask, its sage/gold wash, the soft page tint (see Horizon band), and the director's-cut atmosphere inside the painting (cloud shadows, light ray, glass sheen). Nowhere else.
 - Tactile grain: a barely-there SVG noise layer over the home page (multiply at 7%, soft-light at 10% in dark mode) so it reads as printed paper. If it ever looks dirty, remove it rather than strengthening it.
 - Dark mode exists on the home page only, as a dusk version of each painting's palette. The circuit page stays cream.
@@ -50,19 +50,19 @@ Base values. On the home page they are re-tinted from the current painting (see 
 
 ## Horizon band (`horizon.js`)
 
-- A full-width pastoral painting across the top (`clamp(320px, 62vh, 640px)` tall). It rotates to a new painting every 5s with a 1.6s crossfade.
+- A full-width pastoral painting across the top (`clamp(320px, 62vh, 640px)` tall). It rotates to a new painting every 8s with a 0.8s crossfade.
 - Order: the first painting on each load is random; the rest run in shuffled order with no repeats until the pool is used up, then reshuffle. Up to 8 paintings per visit.
 - Small dots under the band (in a hairline pill) jump to a painting and reseed the queue. Nothing on the page announces the random pull.
 - Live pull: one request per load to the Art Institute of Chicago API (`is_public_domain` only), then filtered client-side: paintings tagged as landscapes with rural subjects (fields, rivers, countryside, cattle...), wide (1.25 to 2.4), calm dominant colour (saturation 62 or less, lightness 28 to 88), dated 1700 to 1925, and nothing stormy, nocturnal, wintry, urban, at sea or a portrait.
 - Fallbacks, used when the API fails, is slow (over 2.5s) or returns fewer than 4 fits: Constable "The Hay Wain", Constable "Stoke-by-Nayland" (in place of the Abby Matthews piece, which isn't public domain), Corot "River with a Distant Tower", Corot "The Vire at Saint-Lô". All public domain, hosted on Wikimedia Commons (a different host from the live pull). They can be bundled into `img/` later.
-- Every painting shows its credit on a small frosted chip over the painting (the credit row sits 30% up from the band's bottom, where the painting still shows): title (linked to its museum page), date, artist. The dots capsule sits beside it.
+- Every painting shows its credit on a small frosted chip on the painting itself, above where the fade starts (the band's mask is solid to 40%; the credit block sits just above that): title (linked to its museum page), date, artist. The dots capsule sits under it, both left-aligned to the column. Inactive dots are full muted (about 6:1 on the glass); the current one is a longer ink capsule.
 - The painting never ends in a hard line: a mask dissolves it down the viewport, a faint sage/gold wash carries a little further, and a soft tint continues down the page behind Work and Experience before settling into flat paper.
-- A thin gold line above the credit is the clock: it fills once per painting (5s) and the next painting comes in when it finishes. Rotation and line pause together while the pointer or focus is on the credit or dots and while the tab is hidden. Under `prefers-reduced-motion` there is no rotation and no line (one random painting, dots still work).
+- A thin gold line above the credit is the clock: it fills once per painting (8s) and the next painting comes in when it finishes. Rotation and line pause together while the pointer or focus is on the credit or dots and while the tab is hidden. Under `prefers-reduced-motion` there is no rotation and no line (one random painting, dots still work).
 
 ## Adaptive theme
 
 - Each painting is sampled on a small canvas: lightest tone becomes paper, darkest becomes ink, then muted, rule, and sage/gold accents. Ink is pushed to at least 12:1 and muted to at least 6.5:1 against paper, in both light and dusk, so muted text still clears 4.5:1 (WCAG AA) where it actually sits: on the tints, the capsules and the glass. Measured in place, the lowest is about 5:1 (the credit chip over the painting).
-- The theme re-tints everything through the CSS variables (paper, text, hairlines, chat, the dots pill, the car, the palette swatches) and crossfades over 1.4s (registered `@property` colours).
+- The theme re-tints everything through the CSS variables (paper, text, hairlines, chat, the car, the palette swatches; not the glass, which stays fixed). It changes in one step at the cut, with no transition, and only while the reader is up at the band: scrolled down to the rows, the page keeps its colours until the next cut seen at the top. Never wash a colour change across the page while someone is reading.
 - Dark mode (`prefers-color-scheme: dark`) uses the dusk version of the same palette.
 - If an image can't be sampled (no CORS), it uses that painting's preset palette.
 
@@ -71,7 +71,7 @@ Base values. On the home page they are re-tinted from the current painting (see 
 One cinematic layer, kept quiet: it should feel like a film, not a trailer.
 
 - Opening credits, once per browser session (sessionStorage; a small head script sets `.opening-on` before first paint): black screen inside thin letterbox bars, "Joey" in the serif resolves out of a blur and a slow zoom, fades up into the painting, then the bars slide away. About 2.5s. A click, tap or key skips straight to the bars leaving. Just the name, no other copy. No replay, no toggle.
-- Ken Burns: each painting zooms very slowly (1.04 to 1.1 over 12s) and drifts one direction, never the same direction twice in a row, with a tiny handheld settle (under 0.2deg) as it lands and a whisper of projector flicker (soft-light white at 5% or less).
+- Ken Burns: each painting zooms very slowly and gently (1.03 to 1.065 over 22s) and drifts about 1% in one direction, never the same direction twice in a row, with a tiny settle (under 0.1deg) as it lands. No flicker layer: the old soft-light projector flicker read as the site flickering and was removed; do not bring it back.
 - On each cut the outgoing print racks out of focus (5px blur) while the new one lands, and the letterbox bars squeeze in briefly (about 1.2vh, 1.1s), only while the band is on screen.
 - The painting is alive at half strength: cloud shadows drifting across the field (80s loop), a soft warm light ray every 17s, six pollen motes, a small flock of birds crossing the sky every 25s, and a faint gallery-glass sheen once per painting.
 - The pointer leans the camera a few pixels around the frame (mouse and trackpad only, eased). Scrolling dollies the backdrop: the painting moves 16vh slower than the page over the first screen (CSS scroll timeline). No other camera moves.
@@ -96,12 +96,12 @@ One cinematic layer, kept quiet: it should feel like a film, not a trailer.
 
 The only motion on the site:
 
-1. The Horizon painting crossfade (1.6s, every 5s) and the theme crossfade that goes with it (1.4s).
+1. The Horizon painting crossfade (0.8s, every 8s). The theme changes with it in one step, no crossfade.
 2. The F1 car lapping the screen edge.
 3. The car lapping a drawn track on the circuit page.
 4. Kinetic type, pure CSS scroll timelines: the nameplate's weight eases from 560 to 400 over the first 70vh of scroll, and each section label's weight goes from 300 to 500 as it enters. A whisper, never more.
 5. Line reveals, pure CSS view timelines: labels, row names and tags, palette items and the footer rise and unclip once as they enter (over roughly the first 12% of their trip up the screen; the footer finishes as soon as it is fully in view).
-6. The director's cut (see above): opening credits, Ken Burns with settle and flicker, rack focus and letterbox squeeze on each cut, the living painting, the gold timeline, the glass sheen, the pointer lean and the scroll dolly.
+6. The director's cut (see above): opening credits, Ken Burns with settle, rack focus and letterbox squeeze on each cut, the living painting, the gold timeline, the glass sheen, the pointer lean and the scroll dolly.
 
 Curves: Apple's ease-out, `cubic-bezier(0,0,.58,1)`, for fades and the letterbox (`--ease-apple`), and a gentle spring (response 0.5s, damping 0.82, about 1% overshoot, as CSS `linear()`) for the camera lean and the row chevron (`--spring`).
 
