@@ -144,7 +144,9 @@
   }
 
   function carAt(sM) {
-    var n = track.pts.length, f = (sM / track.dsM) % n, i = Math.floor(f), t = f - i, k = (i + 1) % n;
+    var n = track.pts.length, f = sM / track.dsM;
+    f = isFinite(f) ? ((f % n) + n) % n : 0;              /* always a valid spot on the lap */
+    var i = Math.floor(f) % n, t = f - Math.floor(f), k = (i + 1) % n;
     var p = track.pts[i], q = track.pts[k];
     return { x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t,
              a: track.head[i] + wrap(track.head[k] - track.head[i]) * t, i: i };
@@ -173,7 +175,9 @@
   function frame(now) {
     raf = 0;
     if (!track || raw) return;
-    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    /* A frame's timestamp can be earlier than when a long track build finished,
+       so dt can come out negative on the first frame. Never let time run backwards. */
+    var dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now);
     var c = carAt(s);
     s = (s + track.v[c.i] * dt * track.timeScale) % track.lenM;
     render();
