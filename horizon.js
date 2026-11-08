@@ -13,7 +13,10 @@
   var band = document.querySelector("[data-horizon]");
   if (!band) return;
   var root = document.documentElement;
-  var art = band.querySelector(".horizon-art");
+  var art = band.querySelector(".horizon-frames");        /* paintings stack here, under the atmosphere layers */
+  var sheen = band.querySelector(".sheen");
+  var fill = band.querySelector(".timeline i");
+  var bars = document.querySelectorAll(".letterbox .bar");
   var creditEl = band.querySelector("[data-credit]");
   var dotsEl = band.querySelector("[data-dots]");
   var themeMeta = document.querySelector('meta[name="theme-color"]');
@@ -238,7 +241,32 @@
   }
 
   /* ---------------------------------------------------------- the rotation */
-  var pool = [], queue = [], cur = -1, front = null, timer = 0, held = false, live = false;
+  var pool = [], queue = [], cur = -1, front = null, run = null, held = false, live = false;
+
+  /* director's cut: each painting drifts one way (never the same way twice in a row) */
+  var DRIFTS = [["-1.8%", "-0.9%"], ["1.8%", "-0.9%"], ["-1.6%", "0.9%"], ["1.6%", "0.9%"], ["0%", "-1.4%"], ["-2%", "0%"], ["2%", "0%"]];
+  var lastDrift = -1;
+  function drift(im) {
+    var d; do { d = Math.floor(Math.random() * DRIFTS.length); } while (d === lastDrift);
+    lastDrift = d;
+    im.style.setProperty("--kb-x", DRIFTS[d][0]);
+    im.style.setProperty("--kb-y", DRIFTS[d][1]);
+  }
+  function inView() { var r = band.getBoundingClientRect(); return r.bottom > window.innerHeight * 0.35 && r.top < window.innerHeight; }
+  /* a brief letterbox squeeze on the cut, only while the band is on screen */
+  function squeeze() {
+    if (still.matches || !inView() || !bars[0] || !bars[0].animate) return;
+    bars.forEach(function (b) {
+      b.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(.11)", offset: .4 }, { transform: "scaleY(0)" }],
+                { duration: 1100, easing: "cubic-bezier(.4,0,.2,1)" });
+    });
+  }
+  /* a faint gallery-glass sheen crosses each print once, just after it lands */
+  function glint() {
+    if (still.matches || !sheen || !sheen.animate) return;
+    sheen.animate([{ transform: "translateX(-55%)", opacity: 0 }, { opacity: 1, offset: .2 }, { opacity: 1, offset: .8 }, { transform: "translateX(55%)", opacity: 0 }],
+                  { duration: 1800, delay: 900, easing: "cubic-bezier(.45,0,.25,1)" });
+  }
 
   function good() { return pool.filter(function (p) { return !p.bad; }).length; }
   function reseed(exclude) {
@@ -259,12 +287,18 @@
       if (pool[i] !== p) return;
       var t = paletteFor(p, im);
       im.className = "";
+      drift(im);
       art.appendChild(im);                       /* newest sits on top and fades in over the old one */
       void im.offsetWidth;
       im.classList.add("is-on");
       var old = front;
       front = im;
-      if (old && old !== im) setTimeout(function () { if (old !== front && old.parentNode) old.parentNode.removeChild(old); }, still.matches ? 0 : FADE_MS + 100);
+      if (old && old !== im) {
+        old.classList.add("out");                /* rack focus: the outgoing print softens as the new one lands */
+        squeeze();
+        setTimeout(function () { if (old !== front && old.parentNode) old.parentNode.removeChild(old); }, still.matches ? 0 : FADE_MS + 100);
+      }
+      glint();
       cur = i;
       credit(p);
       pool.forEach(function (q, k) { if (q.dot) q.dot.setAttribute("aria-pressed", String(k === i)); });
@@ -285,11 +319,17 @@
     show(i).then(function () { preloadNext(); schedule(); }, function () { if (fail(i)) advance(); });
   }
 
+  /* The thin gold line is the clock: it fills once per painting and the
+     next painting comes in when it finishes, so pausing one pauses both. */
+  function stopClock() { if (run) { run.onfinish = null; run.cancel(); run = null; } }
   function schedule() {
-    clearTimeout(timer);
-    if (still.matches || document.hidden || held || good() < 2) return;
-    timer = setTimeout(advance, ROTATE_MS);
+    stopClock();
+    if (still.matches || good() < 2 || !fill || !fill.animate) return;
+    run = fill.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: ROTATE_MS, easing: "linear", fill: "forwards" });
+    run.onfinish = function () { run = null; advance(); };
+    if (document.hidden || held) run.pause();
   }
+  function hold(on) { held = on; if (run) { if (on) run.pause(); else if (!document.hidden) run.play(); } }
 
   function credit(p) {
     creditEl.textContent = "";
@@ -310,7 +350,7 @@
       b.setAttribute("aria-pressed", "false");
       b.addEventListener("click", function () {
         if (k === cur) return;
-        clearTimeout(timer);
+        stopClock();
         show(k).then(function () { reseed(k); preloadNext(); schedule(); },   /* a dot reseeds the queue */
                      function () { if (fail(k)) schedule(); });
       });
@@ -330,11 +370,11 @@
   /* hold while the visitor is on the credit or the dots (not the whole band:
      a cursor resting over the painting shouldn't freeze it) */
   var meta = band.querySelector(".horizon-meta");
-  meta.addEventListener("pointerenter", function () { held = true; clearTimeout(timer); });
-  meta.addEventListener("pointerleave", function () { held = false; schedule(); });
-  meta.addEventListener("focusin", function () { held = true; clearTimeout(timer); });
-  meta.addEventListener("focusout", function (e) { if (!meta.contains(e.relatedTarget)) { held = false; schedule(); } });
-  document.addEventListener("visibilitychange", function () { if (document.hidden) clearTimeout(timer); else schedule(); });
+  meta.addEventListener("pointerenter", function () { hold(true); });
+  meta.addEventListener("pointerleave", function () { hold(false); });
+  meta.addEventListener("focusin", function () { hold(true); });
+  meta.addEventListener("focusout", function (e) { if (!meta.contains(e.relatedTarget)) hold(false); });
+  document.addEventListener("visibilitychange", function () { if (!run) return; if (document.hidden) run.pause(); else if (!held) run.play(); });
   (still.addEventListener ? still.addEventListener.bind(still, "change") : still.addListener.bind(still))(schedule);
 
   pull().then(function (list) { live = true; start(list); },

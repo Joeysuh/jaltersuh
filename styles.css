@@ -65,8 +65,41 @@ html.home body{background:linear-gradient(to bottom,
 .dots button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer}
 .dots button::before{content:"";width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--muted) 45%,transparent)}
 .dots button[aria-pressed="true"]::before{background:var(--fg)}
-.horizon + .col{padding-top:36px}
+.horizon + .col{position:relative;z-index:1;padding-top:36px}   /* text always sits above the dollying band */
 @media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
+
+/* ---- director's cut: one cinematic layer, kept quiet ----
+   camera (leans with the pointer, eased) > frames (paintings) + atmosphere */
+.horizon-cam{position:absolute;inset:0;transform:translate3d(calc(var(--lean-x,0) * -10px),calc(var(--lean-y,0) * -6px),0);transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.horizon-frames{position:absolute;inset:0}
+.atmo{position:absolute;inset:0;pointer-events:none;display:none}
+.timeline{flex-basis:100%;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
+.timeline i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:left}
+
+/* opening credits (first load per session): black, letterbox, the name resolving out of blur, then the bars slide away */
+.opening{display:none}
+.letterbox{position:fixed;inset:0;z-index:9;pointer-events:none}
+.letterbox .bar{position:absolute;left:0;right:0;height:11vh;background:#000;transform:scaleY(0)}
+.bar-top{top:0;transform-origin:top}
+.bar-bottom{bottom:0;transform-origin:bottom}
+html.opening-on .opening{display:block;position:fixed;inset:0;z-index:10;cursor:pointer}
+.opening-black{position:absolute;inset:0;background:#000}
+.opening-name{position:absolute;inset:0;margin:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(2.75rem,8vw,5rem);font-weight:400;letter-spacing:.005em;color:#f3ecdc}
+html.opening-on .letterbox .bar{transform:none}
+html.opening-on .opening-black{animation:open-black 2.5s linear forwards}
+html.opening-on .opening-name{animation:open-name 2.5s cubic-bezier(.25,.6,.25,1) forwards}
+html.opening-on .bar-top{animation:bar-top-away 2.5s cubic-bezier(.65,0,.25,1) forwards}
+html.opening-on .bar-bottom{animation:bar-bottom-away 2.5s cubic-bezier(.65,0,.25,1) forwards}
+html.opening-skip .opening-black,html.opening-skip .opening-name{animation:open-skip .3s ease-out forwards}
+html.opening-skip .bar-top{animation:bar-top-skip .45s cubic-bezier(.65,0,.25,1) forwards}
+html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,.25,1) forwards}
+@keyframes open-black{0%,56%{opacity:1}80%,100%{opacity:0}}
+@keyframes open-name{0%{opacity:0;filter:blur(14px);transform:scale(1.08)}44%{opacity:1;filter:blur(0);transform:scale(1.015)}58%{opacity:1;filter:blur(0);transform:scale(1)}80%,100%{opacity:0;filter:blur(3px);transform:translateY(-6px)}}
+@keyframes bar-top-away{0%,78%{transform:translateY(0)}100%{transform:translateY(-100%)}}
+@keyframes bar-bottom-away{0%,78%{transform:translateY(0)}100%{transform:translateY(100%)}}
+@keyframes open-skip{to{opacity:0}}
+@keyframes bar-top-skip{from{transform:translateY(0)}to{transform:translateY(-100%)}}
+@keyframes bar-bottom-skip{from{transform:translateY(0)}to{transform:translateY(100%)}}
 
 /* ---- intro ---- */
 /* one contrasting serif accent: the nameplate, nothing else */
@@ -154,7 +187,26 @@ html.home body{background:linear-gradient(to bottom,
 /* ---- motion ---- */
 @media (prefers-reduced-motion:no-preference){
   /* painting crossfade 1.6s; theme crossfade 1.4s */
-  .horizon-art img{transition:opacity 1.6s ease}
+  .horizon-art img{transition:opacity 1.6s ease,filter .9s ease}
+
+  /* Ken Burns: a very slow zoom and one drift per painting (direction set in horizon.js),
+     with a tiny handheld settle as it lands; the outgoing print racks out of focus */
+  .horizon-frames img{animation:kb 12s cubic-bezier(.25,.1,.35,1) both,settle 1.8s ease-out both}
+  .horizon-frames img.out{filter:blur(5px)}
+  .atmo{display:block}
+  /* a whisper of projector flicker */
+  .flicker{background:#fff;mix-blend-mode:soft-light;opacity:0;animation:flicker 3.2s steps(1,end) infinite}
+  /* the painting alive, at half strength: cloud shadows, a light ray, pollen, birds every 25s */
+  .clouds{left:-100%;right:auto;width:300%;top:25%;
+    background:radial-gradient(28% 40% at 20% 55%,rgba(20,24,18,.22),transparent 70%),radial-gradient(22% 34% at 62% 40%,rgba(20,24,18,.18),transparent 70%),radial-gradient(30% 38% at 88% 70%,rgba(20,24,18,.2),transparent 70%);
+    background-size:33.3333% 100%;background-repeat:repeat-x;mix-blend-mode:multiply;opacity:.5;animation:clouds 80s linear infinite;
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 35%);mask-image:linear-gradient(to bottom,transparent,#000 35%)}
+  .ray{left:-40%;right:-40%;background:linear-gradient(105deg,transparent 42%,color-mix(in srgb,var(--gold) 45%,#fff) 50%,transparent 58%);mix-blend-mode:soft-light;opacity:0;animation:ray 17s ease-in-out 3s infinite}
+  .motes i{position:absolute;left:var(--x);top:var(--y);width:3px;height:3px;border-radius:50%;background:color-mix(in srgb,var(--bg) 70%,var(--gold));opacity:0;animation:mote var(--t) linear var(--d) infinite}
+  .birds{inset:auto;top:13%;left:0;fill:none;stroke:var(--fg);stroke-width:1.2;stroke-linecap:round;opacity:.5;translate:-12vw 0;animation:birds 25s linear 4s infinite}
+  .birds path{transform-box:fill-box;transform-origin:center;animation:flap .9s ease-in-out infinite alternate}
+  .birds path:nth-child(2n){animation-delay:-.45s}
+  .sheen{left:-50%;right:-50%;background:linear-gradient(115deg,transparent 47%,rgba(255,255,255,.28) 50%,transparent 53%);mix-blend-mode:soft-light;opacity:0}
   html.home{transition:--bg 1.4s ease,--fg 1.4s ease,--muted 1.4s ease,--rule 1.4s ease,--sage 1.4s ease,--gold 1.4s ease}
 }
 /* kinetic type and line reveals: pure CSS scroll timelines, calm ranges.
@@ -162,11 +214,22 @@ html.home body{background:linear-gradient(to bottom,
 @supports (animation-timeline:scroll()){
   @media (prefers-reduced-motion:no-preference){
     .intro h1{animation:nameplate linear both;animation-timeline:scroll(root);animation-range:0 70vh}
+    /* scrolling dollies the backdrop a little slower than the page */
+    .horizon-art{animation:dolly linear both;animation-timeline:scroll(root);animation-range:0 100vh}
     .label{animation:label-weight linear both,line-in linear both;animation-timeline:view(),view();animation-range:entry 0% cover 45%,entry 0% cover 12%}
     .list .t,.list .m,.palette li,.foot > *{animation:line-in linear both;animation-timeline:view();animation-range:entry 0% cover 12%}
     .foot > *{animation-range:entry 0% entry 100%}   /* the page ends here, so finish as soon as it is fully in view */
   }
 }
+@keyframes kb{from{scale:1.04;translate:0 0}to{scale:1.1;translate:var(--kb-x,0) var(--kb-y,0)}}
+@keyframes settle{0%{rotate:.16deg}30%{rotate:-.09deg}60%{rotate:.04deg}100%{rotate:0deg}}
+@keyframes flicker{0%{opacity:0}9%{opacity:.05}11%{opacity:.015}31%{opacity:.04}33%{opacity:0}58%{opacity:.03}61%{opacity:.01}83%{opacity:.045}86%{opacity:0}}
+@keyframes clouds{from{transform:translateX(0)}to{transform:translateX(33.3333%)}}
+@keyframes ray{0%{opacity:0;transform:translateX(-25%)}20%{opacity:.55}55%{opacity:.55}75%,100%{opacity:0;transform:translateX(25%)}}
+@keyframes mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.55}50%{transform:translate(14px,-40px)}85%{opacity:.45}100%{opacity:0;transform:translate(-6px,-90px)}}
+@keyframes birds{0%{translate:-12vw 0}38%,100%{translate:110vw -3vh}}
+@keyframes flap{to{transform:scaleY(.45)}}
+@keyframes dolly{to{translate:0 16vh}}
 @keyframes nameplate{from{font-weight:560}to{font-weight:400}}
 @keyframes label-weight{from{font-weight:300}to{font-weight:500}}
 @keyframes line-in{from{opacity:0;transform:translateY(.4em);clip-path:inset(100% 0 0 0)}to{opacity:1;transform:none;clip-path:inset(0)}}
@@ -176,6 +239,8 @@ html.home body::after{content:"";position:fixed;inset:0;z-index:3;pointer-events
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 @media (prefers-color-scheme:dark){html.home body::after{mix-blend-mode:soft-light;opacity:.1}}
 
+@media (prefers-color-scheme:dark) and (prefers-reduced-motion:no-preference){html.home .horizon-frames img.out{filter:brightness(.8) saturate(.92) blur(5px)}}
 @media (prefers-reduced-motion:reduce){
+  .timeline{display:none}
   .drive{display:none}
 }

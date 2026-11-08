@@ -15,16 +15,38 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@300..600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&text=Joey&display=swap">
 <link rel="stylesheet" href="styles.css">
+<!-- Opening credits: once per browser session, never under reduced motion. Set before first paint so the page starts on black. -->
+<script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){var k="joey-opened",s=null;try{s=sessionStorage.getItem(k);sessionStorage.setItem(k,"1")}catch(e){}if(!s)document.documentElement.classList.add("opening-on")}}catch(e){}</script>
 </head>
 <body>
+
+<!-- Director's cut: the opening (black, the name resolving out of blur) and the letterbox bars,
+     which slide away after the opening and squeeze in briefly when a painting changes. -->
+<div class="opening" aria-hidden="true">
+  <div class="opening-black"></div>
+  <p class="opening-name">Joey</p>
+</div>
+<div class="letterbox" aria-hidden="true"><i class="bar bar-top"></i><i class="bar bar-bottom"></i></div>
 
 <!-- Horizon band: the site's one visual. A public-domain pastoral painting,
      pulled live from the Art Institute of Chicago API (fallbacks on Wikimedia
      Commons), rotating every 5s. horizon.js re-tints the page from each one. -->
 <div class="horizon" data-horizon>
   <div class="horizon-wash" aria-hidden="true"></div>
-  <div class="horizon-art" aria-hidden="true"></div>
+  <div class="horizon-art" aria-hidden="true">
+    <div class="horizon-cam">
+      <div class="horizon-frames"></div>
+      <!-- the painting, alive but gently: cloud shadows, a light ray, pollen, birds, glass sheen, projector flicker -->
+      <div class="atmo clouds"></div>
+      <div class="atmo ray"></div>
+      <div class="atmo motes"><i style="--x:18%;--y:62%;--d:0s;--t:15s"></i><i style="--x:31%;--y:74%;--d:-4s;--t:18s"></i><i style="--x:47%;--y:58%;--d:-9s;--t:16s"></i><i style="--x:63%;--y:70%;--d:-2s;--t:19s"></i><i style="--x:76%;--y:60%;--d:-12s;--t:17s"></i><i style="--x:88%;--y:72%;--d:-6s;--t:20s"></i></div>
+      <svg class="atmo birds" viewBox="0 0 90 30" width="72" height="24"><path d="M4 14q3-3 6 0q3-3 6 0"/><path d="M24 8q2.5-2.5 5 0q2.5-2.5 5 0"/><path d="M38 17q3-3 6 0q3-3 6 0"/><path d="M55 10q2.5-2.5 5 0q2.5-2.5 5 0"/><path d="M70 20q2-2 4 0q2-2 4 0"/></svg>
+      <div class="atmo sheen"></div>
+      <div class="atmo flicker"></div>
+    </div>
+  </div>
   <div class="horizon-meta">
+    <div class="timeline" aria-hidden="true"><i></i></div>
     <p class="credit" data-credit></p>
     <div class="dots" data-dots role="group" aria-label="Paintings"></div>
   </div>
@@ -101,6 +123,7 @@
 </div>
 
 <script src="horizon.js"></script>
+<script src="cinema.js"></script>
 <script src="site.js"></script>
 </body>
 </html>
