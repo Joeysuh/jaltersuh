@@ -427,7 +427,7 @@
     if (p.href) { t.href = p.href; t.target = "_blank"; t.rel = "noopener"; }
     t.textContent = p.title;
     creditEl.appendChild(t);
-    creditEl.appendChild(document.createTextNode((p.date ? ", " + p.date : "") + " · " + p.artist));
+    creditEl.appendChild(document.createTextNode((p.date ? ", " + p.date : "") + "\u00a0· " + p.artist));
   }
 
   /* hold while the visitor is on the credit (not the whole band: a cursor

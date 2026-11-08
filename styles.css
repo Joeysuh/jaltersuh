@@ -67,11 +67,10 @@ html.home body{background:linear-gradient(to bottom,
              radial-gradient(80% 50% at 82% 62%,color-mix(in srgb,var(--gold) 20%,transparent),transparent 70%);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%);
           mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%)}
-.horizon-meta{position:absolute;left:0;right:0;bottom:calc(60% + 12px);z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+/* the credit is a wall label: plain text at the painting's lower right, where it dissolves into the page */
+.horizon-meta{position:absolute;left:0;right:0;bottom:18px;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:12px;
   max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;padding:0 var(--pad)}
-.credit{border:1px solid var(--glass-edge);border-radius:999px;background:var(--glass);
-  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-shadow)}
-.credit{margin:0;min-width:0;padding:7px 14px;font-family:var(--mono);font-size:.75rem;line-height:16px;color:var(--muted)}
+.credit{margin:0;min-width:0;padding:0;text-align:right;text-wrap:balance;font-family:var(--mono);font-size:.75rem;line-height:16px;color:var(--muted)}
 .credit:empty{display:none}
 .credit a{display:inline-block;padding:14px 0;margin:-14px 0;color:var(--fg);text-decoration:none}
 .credit a:hover{text-decoration:underline;text-underline-offset:.25em}
@@ -84,7 +83,7 @@ html.home body{background:linear-gradient(to bottom,
 .horizon-frames{position:absolute;inset:0}
 .atmo{position:absolute;inset:0;pointer-events:none;display:none}
 .timeline{align-self:stretch;flex-basis:auto;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
-.timeline i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:left}
+.timeline i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:right}
 
 /* opening credits (first load per session): black, letterbox, the name resolving out of blur, then the bars slide away */
 .opening{display:none}
