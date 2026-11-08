@@ -9,8 +9,10 @@
      Laps the edge of the screen every 30s: along the bottom, up the right
      wall, across the top upside down, down the left wall. The path is a
      rounded rectangle, so it turns smoothly through the corners, and the car
-     keeps its wheels on the outside edge. Off under reduced motion; frozen
-     while the tab is hidden. */
+     keeps its wheels on the outside edge. It eases through the lap instead of
+     holding one speed: it comes out of each corner, swells down the straight
+     and settles into the next corner, with speed continuous at every join.
+     Off under reduced motion; frozen while the tab is hidden. */
   (function () {
     var car = document.querySelector(".car");
     var layer = document.querySelector(".drive");
@@ -18,6 +20,22 @@
     if (!(window.CSS && CSS.supports && CSS.supports("offset-path", 'path("M0 0H1")'))) return;
 
     var LAP_MS = 30000, R = 44, E = 1;
+    var CORNER = 0.55;                                   /* corner speed as a share of a straight's average */
+    var STRAIGHT = "cubic-bezier(.4,.22,.6,.78)";        /* starts and ends at corner speed (slope .55) */
+
+    function frames() {
+      var W = layer.clientWidth, H = layer.clientHeight, r = Math.min(R, W / 4, H / 4);
+      var h = W - 2 * r, v = H - 2 * r, c = Math.PI * r / 2;
+      var segs = [[h, 1], [c, 0], [v, 1], [c, 0], [h, 1], [c, 0], [v, 1], [c, 0]];
+      var len = 0, time = 0, kf = [], d = 0, t = 0;
+      segs.forEach(function (sg) { len += sg[0]; time += sg[1] ? sg[0] : sg[0] / CORNER; });
+      segs.forEach(function (sg) {
+        kf.push({ offsetDistance: (d / len * 100) + "%", offset: t / time, easing: sg[1] ? STRAIGHT : "linear" });
+        d += sg[0]; t += sg[1] ? sg[0] : sg[0] / CORNER;
+      });
+      kf.push({ offsetDistance: "100%", offset: 1 });
+      return kf;
+    }
 
     function lap() {
       var W = layer.clientWidth, H = layer.clientHeight, r = Math.min(R, W / 4, H / 4);
@@ -28,13 +46,12 @@
 
     car.style.offsetPath = lap();
     car.style.visibility = "visible";
-    var anim = car.animate([{ offsetDistance: "0%" }, { offsetDistance: "100%" }],
-      { duration: LAP_MS, iterations: Infinity, easing: "linear" });
+    var anim = car.animate(frames(), { duration: LAP_MS, iterations: Infinity });
 
     var t = 0;
     window.addEventListener("resize", function () {
       clearTimeout(t);
-      t = setTimeout(function () { car.style.offsetPath = lap(); }, 100);
+      t = setTimeout(function () { car.style.offsetPath = lap(); anim.effect.setKeyframes(frames()); }, 100);
     });
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) anim.pause(); else anim.play();

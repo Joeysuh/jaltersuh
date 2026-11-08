@@ -15,6 +15,14 @@
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --serif:"Newsreader",ui-serif,Georgia,serif;   /* the nameplate only */
   --col:600px; --gap:44px; --pad:20px;
+  /* motion curves: Apple's ease-out, and a gentle spring (response .5s, damping .82, about 1% overshoot) */
+  --ease-apple:cubic-bezier(0,0,.58,1);
+  --spring:linear(0,0.0697,0.2211,0.3947,0.5578,0.6951,0.8024,0.881,0.9355,0.971,0.9924,1.0042,1.0096,1.0111,1.0105,1.0088,1.0069,1.0051,1.0035,1.0023,1.0014,1.0008,1.0004,1.0001,1);
+  /* glass: a finish on a few small surfaces only; the page itself stays paper */
+  --glass:color-mix(in srgb,var(--bg) 66%,transparent);
+  --glass-edge:color-mix(in srgb,var(--fg) 11%,transparent);
+  --glass-blur:blur(20px) saturate(1.5);
+  --glass-shadow:inset 0 1px 0 color-mix(in srgb,#fff 50%,transparent),0 10px 28px -16px color-mix(in srgb,var(--fg) 42%,transparent);
   color-scheme:light;
 }
 
@@ -55,22 +63,26 @@ html.home body{background:linear-gradient(to bottom,
              radial-gradient(80% 50% at 82% 62%,color-mix(in srgb,var(--gold) 20%,transparent),transparent 70%);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%);
           mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%)}
-.horizon-meta{position:absolute;left:0;right:0;bottom:16px;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+.horizon-meta{position:absolute;left:0;right:0;bottom:30%;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
   max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;padding:0 var(--pad)}
-.credit{margin:0;min-width:0;font-family:var(--mono);font-size:.75rem;line-height:1.5;color:var(--muted)}
-.credit a{color:var(--fg);text-decoration:none}
+.credit,.dots{border:1px solid var(--glass-edge);border-radius:999px;background:var(--glass);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-shadow)}
+.credit{margin:0;min-width:0;padding:7px 14px;font-family:var(--mono);font-size:.75rem;line-height:16px;color:var(--muted)}
+.credit:empty{display:none}
+.credit a{display:inline-block;padding:14px 0;margin:-14px 0;color:var(--fg);text-decoration:none}
 .credit a:hover{text-decoration:underline;text-underline-offset:.25em}
-.dots{display:flex;align-items:center;padding:2px 4px;border:1px solid var(--rule);border-radius:999px;background:color-mix(in srgb,var(--bg) 70%,transparent)}
+.dots{display:flex;align-items:center;height:32px;padding:0 4px;background:color-mix(in srgb,var(--bg) 48%,transparent)}   /* no text inside, so it can let more painting through */
 .dots:empty{display:none}
-.dots button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer}
-.dots button::before{content:"";width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--muted) 45%,transparent)}
+/* 44px targets inside a 32px capsule (narrower only when eight dots must fit a phone) */
+.dots button{display:grid;place-items:center;width:min(44px,calc((100vw - 56px) / 8));height:44px;margin:-6px 0;padding:0;border:0;background:none;cursor:pointer}
+.dots button::before{content:"";width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--muted) 50%,transparent)}
 .dots button[aria-pressed="true"]::before{background:var(--fg)}
 .horizon + .col{position:relative;z-index:1;padding-top:36px}   /* text always sits above the dollying band */
 @media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
 
 /* ---- director's cut: one cinematic layer, kept quiet ----
    camera (leans with the pointer, eased) > frames (paintings) + atmosphere */
-.horizon-cam{position:absolute;inset:0;transform:translate3d(calc(var(--lean-x,0) * -10px),calc(var(--lean-y,0) * -6px),0);transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.horizon-cam{position:absolute;inset:0;transform:translate3d(calc(var(--lean-x,0) * -10px),calc(var(--lean-y,0) * -6px),0);transition:transform 1.2s var(--spring)}
 .horizon-frames{position:absolute;inset:0}
 .atmo{position:absolute;inset:0;pointer-events:none;display:none}
 .timeline{flex-basis:100%;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
@@ -88,11 +100,11 @@ html.opening-on .opening{display:block;position:fixed;inset:0;z-index:10;cursor:
 html.opening-on .letterbox .bar{transform:none}
 html.opening-on .opening-black{animation:open-black 2.5s linear forwards}
 html.opening-on .opening-name{animation:open-name 2.5s cubic-bezier(.25,.6,.25,1) forwards}
-html.opening-on .bar-top{animation:bar-top-away 2.5s cubic-bezier(.65,0,.25,1) forwards}
-html.opening-on .bar-bottom{animation:bar-bottom-away 2.5s cubic-bezier(.65,0,.25,1) forwards}
+html.opening-on .bar-top{animation:bar-top-away 2.5s var(--ease-apple) forwards}
+html.opening-on .bar-bottom{animation:bar-bottom-away 2.5s var(--ease-apple) forwards}
 html.opening-skip .opening-black,html.opening-skip .opening-name{animation:open-skip .3s ease-out forwards}
-html.opening-skip .bar-top{animation:bar-top-skip .45s cubic-bezier(.65,0,.25,1) forwards}
-html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,.25,1) forwards}
+html.opening-skip .bar-top{animation:bar-top-skip .45s var(--ease-apple) forwards}
+html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) forwards}
 @keyframes open-black{0%,56%{opacity:1}80%,100%{opacity:0}}
 @keyframes open-name{0%{opacity:0;filter:blur(14px);transform:scale(1.08)}44%{opacity:1;filter:blur(0);transform:scale(1.015)}58%{opacity:1;filter:blur(0);transform:scale(1)}80%,100%{opacity:0;filter:blur(3px);transform:translateY(-6px)}}
 @keyframes bar-top-away{0%,78%{transform:translateY(0)}100%{transform:translateY(-100%)}}
@@ -103,11 +115,11 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,
 
 /* ---- intro ---- */
 /* one contrasting serif accent: the nameplate, nothing else */
-.intro h1{margin:0;font-family:var(--serif);font-size:1.625rem;line-height:1.2;font-weight:500;letter-spacing:-.005em;font-optical-sizing:auto}
-.lede{margin:.25rem 0 0;color:var(--muted)}
+.intro h1{margin:0;font-family:var(--serif);font-size:1.75rem;line-height:1.15;font-weight:500;letter-spacing:-.005em;font-optical-sizing:auto}
+.lede{margin:6px 0 0;font-size:1.0625rem;line-height:1.47;letter-spacing:-.01em;color:var(--muted)}
 
-.socials{display:flex;gap:4px;margin:-8px 0 -8px -9px;padding:0;list-style:none}
-.socials a{display:grid;place-items:center;width:36px;height:36px;color:var(--fg)}
+.socials{display:flex;gap:4px;margin:-12px 0 -12px -13px;padding:0;list-style:none}
+.socials a{display:grid;place-items:center;width:44px;height:44px;color:var(--fg)}
 .socials a:hover{color:var(--muted)}
 .socials svg{width:18px;height:18px;fill:currentColor}
 
@@ -120,41 +132,49 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,
 .msg-me:not(:first-child){margin-top:.65rem}
 .msg-wait{color:var(--muted)}
 
-.ask{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--fg);padding-bottom:1px}
-.ask:focus-within{border-bottom-width:2px;padding-bottom:0}
+.ask{display:flex;align-items:center;gap:8px;padding:2px 3px 2px 16px;border:1px solid var(--glass-edge);border-radius:14px;
+  background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-shadow)}
+.ask:focus-within{border-color:color-mix(in srgb,var(--fg) 45%,transparent);box-shadow:var(--glass-shadow),0 0 0 3px color-mix(in srgb,var(--fg) 12%,transparent)}
 /* Notion text-input calibration: 16/24 type in a 44px field */
-.ask input{flex:1;min-width:0;padding:10px 0;line-height:24px;border:0;border-radius:0;background:none;color:var(--fg);font:inherit;font-size:1rem}
+.ask input{flex:1;min-width:0;padding:10px 0;line-height:24px;border:0;border-radius:0;background:none;color:var(--fg);font:inherit;font-size:1.0625rem;letter-spacing:-.01em}
 .ask input::placeholder{color:var(--muted);opacity:1}
 .ask input:focus{outline:none}
-.send{display:grid;place-items:center;flex:none;width:36px;height:36px;margin-right:-8px;padding:0;border:0;background:none;color:var(--accent);cursor:pointer}
+.send{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:11px;padding:0;border:0;background:none;color:var(--accent);cursor:pointer}
 .send:disabled{opacity:.4;cursor:default}
 .send svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
-.note{margin:8px 0 0;font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
+.note{margin:8px 0 0 16px;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 
 /* ---- work + experience ---- */
 /* Notion calibration: 16/24 rows on a 4px grid, 8px under the label, hairline dividers.
    Taste density: Work a little tighter (41px rows), Experience a little airier (53px). */
-.label{margin:0 0 8px;font-family:var(--mono);font-size:.75rem;line-height:16px;font-weight:400;color:var(--muted)}
+.label{margin:0 0 8px;font-family:var(--mono);font-size:.8125rem;line-height:16px;font-weight:400;color:var(--muted)}
 .list{margin:0;padding:0;list-style:none}
-.list-tight{--row-pad:8px}
-.list-airy{--row-pad:14px}
-.list li{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;column-gap:16px;
+.list-tight{--row-pad:10px}
+.list-airy{--row-pad:16px}
+.list li{position:relative;display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;column-gap:12px;cursor:pointer;
   padding:var(--row-pad,10px) 0;line-height:24px;border-bottom:1px solid var(--rule)}
 .list li:last-child{border-bottom:0}
 .list li:focus{outline:none}
 .list li:focus-visible{outline:2px solid var(--fg);outline-offset:4px}
 .m{flex:none;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
-.list .m{line-height:16px;white-space:nowrap}
+.list .t{order:1;margin-right:auto;font-size:1.0625rem;letter-spacing:-.01em}
+/* capsule tags */
+.list .m{order:2;line-height:16px;white-space:nowrap;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+/* a faint chevron says the row opens; it turns down when it does */
+.list li::after{content:"";order:3;flex:none;width:7px;height:7px;margin:0 4px 0 2px;border-top:1.5px solid var(--muted);border-right:1.5px solid var(--muted);opacity:.5;transform:rotate(45deg)}
+.list li.is-open::after{transform:rotate(135deg)}
+.list .peek{order:4}
 
 /* index-style previews: beside the row on wide screens (hover or keyboard focus),
    under it on tap everywhere else. The rows themselves don't change. Copy comes from the chat. */
-.peek{display:none;font-size:.8125rem;line-height:1.5;color:var(--muted);text-wrap:pretty}
+.peek{display:none;font-size:.9375rem;line-height:1.45;color:var(--muted);text-wrap:pretty;cursor:auto;
+  border:1px solid var(--glass-edge);border-radius:14px;background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-shadow)}
 @media (hover:hover) and (min-width:1240px){
-  .peek{position:absolute;left:calc(100% + 40px);top:var(--row-pad,10px);width:240px;padding-top:8px;border-top:1px solid var(--rule)}
+  .peek{position:absolute;left:calc(100% + 28px);top:calc(var(--row-pad,10px) - 10px);width:256px;padding:12px 14px}
   .list li:hover .peek,.list li:focus-visible .peek,.list li.is-open .peek{display:block}
 }
 @media not all and (hover:hover) and (min-width:1240px){
-  .list li.is-open .peek,.list li:focus-visible .peek{display:block;flex-basis:100%;padding:6px 0 2px}
+  .list li.is-open .peek,.list li:focus-visible .peek{display:block;flex-basis:100%;margin:10px 0 2px;padding:12px 14px}
 }
 /* ---- palette: the current painting's colours, live ---- */
 .palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px;margin:8px 0 0;padding:0;list-style:none}
@@ -164,7 +184,7 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,
 .palette .m{line-height:1.4}
 @media (max-width:480px){.palette{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .foot{display:flex;justify-content:space-between;gap:16px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--muted)}
-.foot a{text-underline-offset:.25em}
+.foot a{display:inline-block;padding:14px 0;margin:-14px 0;text-underline-offset:.25em}   /* 44px target */
 .foot a:hover{color:var(--fg)}
 
 /* ---- the F1 car: laps the viewport edge (site.js), wheels on the outside, coloured by the theme ---- */
@@ -184,10 +204,15 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,
 .clear{margin-left:12px;padding:0;border:0;background:none;font-family:var(--mono);font-size:.75rem;color:var(--muted);text-decoration:underline;text-underline-offset:.25em;cursor:pointer}
 .clear:hover{color:var(--fg)}
 
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{--glass:color-mix(in srgb,var(--bg) 92%,transparent)}
+}
+
 /* ---- motion ---- */
 @media (prefers-reduced-motion:no-preference){
   /* painting crossfade 1.6s; theme crossfade 1.4s */
-  .horizon-art img{transition:opacity 1.6s ease,filter .9s ease}
+  .horizon-art img{transition:opacity 1.6s var(--ease-apple),filter .9s var(--ease-apple)}
+  .list li::after{transition:transform .8s var(--spring)}
 
   /* Ken Burns: a very slow zoom and one drift per painting (direction set in horizon.js),
      with a tiny handheld settle as it lands; the outgoing print racks out of focus */
@@ -207,7 +232,7 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s cubic-bezier(.65,0,
   .birds path{transform-box:fill-box;transform-origin:center;animation:flap .9s ease-in-out infinite alternate}
   .birds path:nth-child(2n){animation-delay:-.45s}
   .sheen{left:-50%;right:-50%;background:linear-gradient(115deg,transparent 47%,rgba(255,255,255,.28) 50%,transparent 53%);mix-blend-mode:soft-light;opacity:0}
-  html.home{transition:--bg 1.4s ease,--fg 1.4s ease,--muted 1.4s ease,--rule 1.4s ease,--sage 1.4s ease,--gold 1.4s ease}
+  html.home{transition:--bg 1.4s var(--ease-apple),--fg 1.4s var(--ease-apple),--muted 1.4s var(--ease-apple),--rule 1.4s var(--ease-apple),--sage 1.4s var(--ease-apple),--gold 1.4s var(--ease-apple)}
 }
 /* kinetic type and line reveals: pure CSS scroll timelines, calm ranges.
    Browsers without scroll timelines, and reduced motion, get the static page. */

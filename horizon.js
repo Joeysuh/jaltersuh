@@ -171,7 +171,7 @@
 
   /* lightest tone -> paper, darkest -> ink, then muted/rule between them and
      sage/gold accents; every text colour is pushed until it clears WCAG AA
-     (ink 12:1, muted 5:1) against its paper, in both light and dusk. */
+     (ink 12:1, muted 6.5:1 so it still clears 4.5:1 on tints and glass) against its paper, in both light and dusk. */
   function derive(s) {
     var L = rgb2hsl(s.light), D = rgb2hsl(s.dark);
     var sg = s.sage ? rgb2hsl(s.sage) : [88, .2, .55], gd = s.gold ? rgb2hsl(s.gold) : [42, .45, .6];
@@ -179,11 +179,11 @@
 
     var bg = hsl2rgb([L[0], clamp(L[1] * .6, .1, .32), .925]);
     var fg = reach([D[0], clamp(D[1], .12, .42), .2], bg, 12, -1);
-    var muted = reach([D[0], clamp(D[1] * .7, .08, .25), .45], bg, 5, -1);
+    var muted = reach([D[0], clamp(D[1] * .7, .08, .25), .45], bg, 6.5, -1);
 
     var dbg = hsl2rgb([D[0], clamp(D[1] * .8, .12, .32), .11]);
     var dfg = reach([L[0], clamp(L[1] * .5, .06, .22), .88], dbg, 12, 1);
-    var dmuted = reach([L[0], clamp(L[1] * .4, .05, .18), .62], dbg, 5, 1);
+    var dmuted = reach([L[0], clamp(L[1] * .4, .05, .18), .62], dbg, 6.5, 1);
 
     return {
       light: { bg: rgb2hex(bg), fg: rgb2hex(fg), muted: rgb2hex(muted), rule: rgb2hex(mix(bg, fg, .14)),
@@ -258,7 +258,7 @@
     if (still.matches || !inView() || !bars[0] || !bars[0].animate) return;
     bars.forEach(function (b) {
       b.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(.11)", offset: .4 }, { transform: "scaleY(0)" }],
-                { duration: 1100, easing: "cubic-bezier(.4,0,.2,1)" });
+                { duration: 1100, easing: "cubic-bezier(0,0,.58,1)" });   /* Apple ease-out */
     });
   }
   /* a faint gallery-glass sheen crosses each print once, just after it lands */
