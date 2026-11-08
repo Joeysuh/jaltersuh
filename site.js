@@ -6,66 +6,39 @@
   var CHAT_ENDPOINT = "";
 
   /* ---------------------------------------------------------------- F1 car
-     A pass starts every 10s (first at 4s). Most passes run the bottom lane in
-     2.5s. Every third pass, starting with the second, the car does a
-     loop-the-loop over the page and drops back to the lane. Off under reduced
-     motion; frozen while the tab is hidden. */
+     Laps the edge of the screen every 30s: along the bottom, up the right
+     wall, across the top upside down, down the left wall. The path is a
+     rounded rectangle, so it turns smoothly through the corners, and the car
+     keeps its wheels on the outside edge. Off under reduced motion; frozen
+     while the tab is hidden. */
   (function () {
     var car = document.querySelector(".car");
-    var lane = document.querySelector(".lane");
-    if (!car || !car.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var layer = document.querySelector(".drive");
+    if (!car || !layer || !car.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!(window.CSS && CSS.supports && CSS.supports("offset-path", 'path("M0 0H1")'))) return;
 
-    var EVERY = 10000, LANE_MS = 2500, EASE = "cubic-bezier(.45,0,.55,1)", W_CAR = 56, H_CAR = 16;
-    var canLoop = window.CSS && CSS.supports && CSS.supports("offset-path", 'path("M0 0H1")');
-    var n = 0, anim = null, timer = null, nextAt = 0, startedAt = 0;
+    var LAP_MS = 30000, R = 44, E = 1;
 
-    function trackY() { var r = lane.getBoundingClientRect(); return r.top + 19; } /* top of the 1px line */
-
-    function done() {
-      car.style.visibility = "hidden";
-      car.style.offsetPath = "";
-      anim = null;
-      schedule(Math.max(EVERY - (Date.now() - startedAt), 4000));
+    function lap() {
+      var W = layer.clientWidth, H = layer.clientHeight, r = Math.min(R, W / 4, H / 4);
+      function arc(x, y) { return "A" + r + " " + r + " 0 0 0 " + x + " " + y; }
+      return 'path("M' + r + " " + (H - E) + "H" + (W - r) + arc(W - E, H - r) +
+        "V" + r + arc(W - r, E) + "H" + r + arc(E, r) + "V" + (H - r) + arc(r, H - E) + 'Z")';
     }
 
-    function run() {
-      timer = null;
-      n++;
-      startedAt = Date.now();
-      var W = window.innerWidth, y = trackY();
-      var r = Math.min(200, W * 0.3, (y - 48) / 2);
-      if (canLoop && n % 3 === 2 && r >= 60) {
-        var cx = Math.round(W / 2);
-        car.style.offsetPath = 'path("M' + -W_CAR + " " + y + "H" + cx +
-          "A" + r + " " + r + " 0 0 0 " + cx + " " + (y - 2 * r) +
-          "A" + r + " " + r + " 0 0 0 " + cx + " " + y + "H" + (W + W_CAR) + '")';
-        var len = W + 2 * W_CAR + 2 * Math.PI * r;
-        anim = car.animate([{ offsetDistance: "0%" }, { offsetDistance: "100%" }],
-          { duration: Math.min(6000, LANE_MS * len / (W + 2 * W_CAR) * 1.15), easing: EASE });
-      } else {
-        var top = y - H_CAR;
-        anim = car.animate([
-          { transform: "translate(" + -W_CAR + "px," + top + "px)" },
-          { transform: "translate(" + (W + 4) + "px," + top + "px)" }
-        ], { duration: LANE_MS, easing: EASE });
-      }
-      car.style.visibility = "visible";
-      anim.onfinish = done;
-    }
+    car.style.offsetPath = lap();
+    car.style.visibility = "visible";
+    var anim = car.animate([{ offsetDistance: "0%" }, { offsetDistance: "100%" }],
+      { duration: LAP_MS, iterations: Infinity, easing: "linear" });
 
-    function schedule(ms) { nextAt = Date.now() + ms; timer = setTimeout(run, ms); }
-
-    document.addEventListener("visibilitychange", function () {
-      if (document.hidden) {
-        if (anim) anim.pause();
-        if (timer) { clearTimeout(timer); timer = null; nextAt -= Date.now(); }
-      } else {
-        if (anim) anim.play();
-        else if (!timer) schedule(Math.max(nextAt, 1000));
-      }
+    var t = 0;
+    window.addEventListener("resize", function () {
+      clearTimeout(t);
+      t = setTimeout(function () { car.style.offsetPath = lap(); }, 100);
     });
-
-    schedule(4000);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) anim.pause(); else anim.play();
+    });
   })();
 
   /* ------------------------------------------------------------------ socials

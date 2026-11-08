@@ -1,12 +1,19 @@
-/* Locked tokens. See CLAUDE.md before changing anything here.
-   Tesla red appears once: the chat send arrow. */
+/* Base tokens. See CLAUDE.md before changing anything here.
+   On the home page horizon.js re-tints --bg/--fg/--muted/--rule/--sage/--gold
+   from the current painting. Tesla red never changes and appears once: the
+   chat send arrow. */
+@property --bg{syntax:"<color>";inherits:true;initial-value:#f3ecdc}
+@property --fg{syntax:"<color>";inherits:true;initial-value:#1b2547}
+@property --muted{syntax:"<color>";inherits:true;initial-value:#5d6479}
+@property --rule{syntax:"<color>";inherits:true;initial-value:#ddd3bf}
+@property --sage{syntax:"<color>";inherits:true;initial-value:#9aa27c}
+@property --gold{syntax:"<color>";inherits:true;initial-value:#c8a45e}
 :root{
   --bg:#f3ecdc; --fg:#1b2547; --muted:#5d6479; --rule:#ddd3bf;
   --accent:#e31937;
   --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --col:600px; --gap:44px; --pad:20px;
-  --lane:20px;
   color-scheme:light;
 }
 
@@ -19,14 +26,46 @@ button{font:inherit;color:inherit}
 
 /* ---- the column ---- */
 .col{display:flex;flex-direction:column;gap:var(--gap);max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;
-  padding:56px var(--pad) calc(48px + var(--lane) + env(safe-area-inset-bottom))}
+  padding:56px var(--pad) calc(48px + env(safe-area-inset-bottom))}
 
-/* ---- CAN trace ---- */
-.can{display:block;width:100%;height:28px}
-.can path{fill:none;stroke:var(--fg);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-/* halftone divider: attached to the trace (not its own block), static, print texture only */
-.scope{display:flex;flex-direction:column;gap:14px}
-.halftone{display:block;fill:var(--fg);opacity:.3}
+/* ---- home theme: painting-driven, with a dusk version in dark mode ---- */
+html.home{--sage:#9aa27c;--gold:#c8a45e;color-scheme:light dark}
+@media (prefers-color-scheme:dark){
+  html.home{--bg:#151a28;--fg:#ece5d6;--muted:#a3a7b3;--rule:#2d3346;--sage:#56613f;--gold:#7f6b3f}
+}
+/* a soft tint of the painting runs down the page behind Work and Experience, then settles into flat paper */
+html.home body{background:linear-gradient(to bottom,
+  color-mix(in oklab,var(--bg),var(--sage) 9%) 0%,
+  color-mix(in oklab,var(--bg),var(--gold) 7%) 32%,
+  color-mix(in oklab,var(--bg),var(--sage) 5%) 58%,
+  var(--bg) 84%) var(--bg)}
+
+/* ---- Horizon band: the one visual ---- */
+.horizon{position:relative;height:clamp(320px,62vh,640px)}
+/* the painting dissolves down the viewport instead of ending in a hard line */
+.horizon-art{position:absolute;inset:0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.2) 82%,transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.2) 82%,transparent 100%)}
+.horizon-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 42%;opacity:0}
+.horizon-art img.is-on{opacity:1}
+/* a faint sage/gold wash carries the painting a little further than the image */
+.horizon-wash{position:absolute;left:0;right:0;top:0;height:calc(100% + 45vh);pointer-events:none;
+  background:radial-gradient(90% 55% at 18% 70%,color-mix(in srgb,var(--sage) 24%,transparent),transparent 72%),
+             radial-gradient(80% 50% at 82% 62%,color-mix(in srgb,var(--gold) 20%,transparent),transparent 70%);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0%,#000 38%,#000 58%,transparent 100%)}
+.horizon-meta{position:absolute;left:0;right:0;bottom:16px;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+  max-width:calc(var(--col) + 2 * var(--pad));margin:0 auto;padding:0 var(--pad)}
+.credit{margin:0;min-width:0;font-family:var(--mono);font-size:.75rem;line-height:1.5;color:var(--muted)}
+.credit a{color:var(--fg);text-decoration:none}
+.credit a:hover{text-decoration:underline;text-underline-offset:.25em}
+.dots{display:flex;align-items:center;padding:2px 4px;border:1px solid var(--rule);border-radius:999px;background:color-mix(in srgb,var(--bg) 70%,transparent)}
+.dots:empty{display:none}
+.dots button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer}
+.dots button::before{content:"";width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--muted) 45%,transparent)}
+.dots button[aria-pressed="true"]::before{background:var(--fg)}
+.horizon + .col{padding-top:36px}
+@media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
 
 /* ---- intro ---- */
 .intro h1{margin:0;font-size:1.375rem;line-height:1.3;font-weight:500;letter-spacing:-.01em}
@@ -56,33 +95,28 @@ button{font:inherit;color:inherit}
 .send svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .note{margin:8px 0 0;font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
 
-/* ---- work + experience ----
-   Interfaces cheat sheet: 8px rhythm (16px label line + 8px, 40px rows),
-   items 16px apart and groups 44px apart (at least 2x), tags never wrap. */
-.label{margin:0 0 8px;font-family:var(--mono);font-size:.75rem;line-height:16px;font-weight:400;color:var(--muted)}
+/* ---- work + experience ---- */
+.label{margin:0 0 4px;font-family:var(--mono);font-size:.75rem;font-weight:400;color:var(--muted)}
 .list{margin:0;padding:0;list-style:none}
-.list li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;column-gap:16px;padding:8px 0 7px;line-height:24px;border-bottom:1px solid var(--rule)}
+.list li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--rule)}
 .list li:last-child{border-bottom:0}
-.t{min-width:0;overflow-wrap:break-word;text-wrap:pretty}
-.m{flex:none;font-family:var(--mono);font-size:.75rem;line-height:16px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
-/* Ultramock-ready frame in the first Work row: a static CSS 3D tilt, no motion.
-   Add class "flat" on the figure if the image is already a 3D device render. */
-.shot{flex-basis:100%;margin:8px 0;perspective:800px;perspective-origin:120px 50%}
-.shot img{display:block;width:240px;max-width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;
-  border:1px solid var(--rule);background:var(--bg);transform:rotateY(-18deg) rotateX(8deg);transform-origin:left bottom}
-.shot.flat img{transform:none}
+.m{flex:none;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+/* ---- palette: the current painting's colours, live ---- */
+.palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px;margin:8px 0 0;padding:0;list-style:none}
+.palette li{display:grid;grid-template-columns:18px 1fr;column-gap:10px;align-items:center;min-width:0}
+.palette .chip{grid-row:span 2;width:18px;height:18px;border-radius:50%;background:var(--c);border:1px solid color-mix(in srgb,var(--fg) 18%,transparent)}
+.palette .t{font-size:.9375rem;line-height:1.3}
+.palette .m{line-height:1.4}
+@media (max-width:480px){.palette{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .foot{display:flex;justify-content:space-between;gap:16px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 .foot a{text-underline-offset:.25em}
 .foot a:hover{color:var(--fg)}
 
-/* ---- the F1 car: a lane at the bottom edge, opaque so lane passes never sit on content ---- */
-.lane{position:fixed;left:0;right:0;bottom:0;z-index:1;height:calc(var(--lane) + env(safe-area-inset-bottom));
-  background:var(--bg);overflow:hidden;pointer-events:none}
-.lane::after{content:"";position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom);height:1px;background:var(--rule)}
-/* the car rides a full-viewport layer so the occasional loop can leave the lane.
-   site.js moves it; it stays hidden between passes. */
-.drive{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+/* ---- the F1 car: laps the viewport edge (site.js), wheels on the outside, coloured by the theme ---- */
+.drive{position:fixed;inset:0;z-index:4;overflow:hidden;pointer-events:none}
 .car{position:absolute;left:0;top:0;display:block;visibility:hidden;offset-anchor:50% 100%;offset-rotate:auto}
+.car g{stroke:var(--fg)}
+.car circle{fill:var(--bg)}
 
 /* ---- circuit page: the whole viewport is the drawing surface ---- */
 .circuit-page{overflow:hidden;overscroll-behavior:none}
@@ -97,11 +131,10 @@ button{font:inherit;color:inherit}
 
 /* ---- motion ---- */
 @media (prefers-reduced-motion:no-preference){
-  /* the trace sweeps in once, like a scope, then holds */
-  .can{animation:sweep 1.4s cubic-bezier(.3,0,.2,1) .15s both}
+  /* painting crossfade 1.6s; theme crossfade 1.4s */
+  .horizon-art img{transition:opacity 1.6s ease}
+  html.home{transition:--bg 1.4s ease,--fg 1.4s ease,--muted 1.4s ease,--rule 1.4s ease,--sage 1.4s ease,--gold 1.4s ease}
 }
-@keyframes sweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @media (prefers-reduced-motion:reduce){
-  .lane,.drive{display:none}
-  .col{padding-bottom:48px}
+  .drive{display:none}
 }

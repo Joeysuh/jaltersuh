@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="home">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Joey</title>
 <meta name="description" content="Joey. Firmware, real-time systems and hardware accelerators. Computer Engineering at Waterloo, now at Tesla.">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f3ecdc">
 <meta property="og:title" content="Joey">
 <meta property="og:description" content="Firmware, real-time systems and hardware accelerators.">
@@ -17,29 +17,19 @@
 </head>
 <body>
 
-<main class="col">
-  <div class="scope">
-  <!-- A real CAN 2.0A frame on the bus: ID 0x7E0, DLC 4, data "JOEY",
-       CRC-15 0x74B2, bit-stuffed, ACKed. Dominant bits split H and L. -->
-  <svg class="can" viewBox="0 -0.5 600 28" preserveAspectRatio="none" role="img" aria-label="CAN bus trace">
-    <path d="M0 14H27.27L28.87 7H34.09L35.69 14H68.18L69.78 7H75L76.6 14H81.82L83.42 7H115.91L117.51 14H122.73L124.33 7H150L151.6 14H156.82L158.42 7H177.27L178.87 14H184.09L185.69 7H197.73L199.33 14H204.55L206.15 7H211.36L212.96 14H218.18L219.78 7H231.82L233.42 14H238.64L240.24 7H252.27L253.87 14H279.55L281.15 7H286.36L287.96 14H293.18L294.78 7H313.64L315.24 14H320.45L322.05 7H327.27L328.87 14H334.09L335.69 7H340.91L342.51 14H347.73L349.33 7H354.55L356.15 14H368.18L369.78 7H381.82L383.42 14H409.09L410.69 7H415.91L417.51 14H422.73L424.33 7H436.36L437.96 14H443.18L444.78 7H450L451.6 14H463.64L465.24 7H477.27L478.87 14H484.09L485.69 7H490.91L492.51 14H497.73L499.33 7H504.55L506.15 14H600"/>
-    <path d="M0 14H27.27L28.87 21H34.09L35.69 14H68.18L69.78 21H75L76.6 14H81.82L83.42 21H115.91L117.51 14H122.73L124.33 21H150L151.6 14H156.82L158.42 21H177.27L178.87 14H184.09L185.69 21H197.73L199.33 14H204.55L206.15 21H211.36L212.96 14H218.18L219.78 21H231.82L233.42 14H238.64L240.24 21H252.27L253.87 14H279.55L281.15 21H286.36L287.96 14H293.18L294.78 21H313.64L315.24 14H320.45L322.05 21H327.27L328.87 14H334.09L335.69 21H340.91L342.51 14H347.73L349.33 21H354.55L356.15 14H368.18L369.78 21H381.82L383.42 14H409.09L410.69 21H415.91L417.51 14H422.73L424.33 21H436.36L437.96 14H443.18L444.78 21H450L451.6 14H463.64L465.24 21H477.27L478.87 14H484.09L485.69 21H490.91L492.51 14H497.73L499.33 21H504.55L506.15 14H600"/>
-  </svg>
-  <!-- Halftone divider: a static print-texture rule. 4px staggered screen,
-       dot size peaks in the middle rows. Navy at low opacity, no images. -->
-  <svg class="halftone" width="100%" height="16" aria-hidden="true" focusable="false">
-    <defs>
-      <pattern id="halftone-dots" width="4" height="16" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="2" r=".45"/>
-        <circle cx="0" cy="6" r=".85"/><circle cx="4" cy="6" r=".85"/>
-        <circle cx="2" cy="10" r=".85"/>
-        <circle cx="0" cy="14" r=".45"/><circle cx="4" cy="14" r=".45"/>
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#halftone-dots)"/>
-  </svg>
+<!-- Horizon band: the site's one visual. A public-domain pastoral painting,
+     pulled live from the Art Institute of Chicago API (fallbacks on Wikimedia
+     Commons), rotating every 5s. horizon.js re-tints the page from each one. -->
+<div class="horizon" data-horizon>
+  <div class="horizon-wash" aria-hidden="true"></div>
+  <div class="horizon-art" aria-hidden="true"></div>
+  <div class="horizon-meta">
+    <p class="credit" data-credit></p>
+    <div class="dots" data-dots role="group" aria-label="Paintings"></div>
   </div>
+</div>
 
+<main class="col">
   <header class="intro">
     <h1>Joey</h1>
     <p class="lede">Firmware, real-time systems and hardware accelerators.</p>
@@ -61,13 +51,7 @@
   <section aria-labelledby="work-h">
     <h2 class="label" id="work-h">Work</h2>
     <ol class="list">
-      <li><span class="t">Bare-metal RTOS</span><span class="m">STM32</span>
-        <!-- PLACEHOLDER: Ultramock slot. To replace:
-             1. Export your image (16:10, about 1200x750) and save it as img/rtos-shot.png
-             2. Change src below to img/rtos-shot.png and write a real alt
-             3. If the export is already a 3D device render, change class="shot" to class="shot flat" -->
-        <figure class="shot"><img src="img/rtos-shot-placeholder.svg" width="240" height="150" alt="" loading="lazy"></figure>
-      </li>
+      <li><span class="t">Bare-metal RTOS</span><span class="m">STM32</span></li>
       <li><span class="t">ALIVE</span><span class="m">Capstone</span></li>
       <li><span class="t">BitWave accelerator</span><span class="m">RTL</span></li>
       <li><span class="t">Multi-precision dot product</span><span class="m">RTL</span></li>
@@ -85,10 +69,21 @@
     </ol>
   </section>
 
+  <section aria-labelledby="pal-h">
+    <h2 class="label" id="pal-h">Palette</h2>
+    <ul class="palette">
+      <li><span class="chip" style="--c:var(--bg)"></span><span class="t">Paper</span><span class="m" data-hex="bg">#F3ECDC</span></li>
+      <li><span class="chip" style="--c:var(--fg)"></span><span class="t">Ink</span><span class="m" data-hex="fg">#1B2547</span></li>
+      <li><span class="chip" style="--c:var(--muted)"></span><span class="t">Muted</span><span class="m" data-hex="muted">#5D6479</span></li>
+      <li><span class="chip" style="--c:var(--rule)"></span><span class="t">Rule</span><span class="m" data-hex="rule">#DDD3BF</span></li>
+      <li><span class="chip" style="--c:var(--sage)"></span><span class="t">Sage</span><span class="m" data-hex="sage">#9AA27C</span></li>
+      <li><span class="chip" style="--c:var(--gold)"></span><span class="t">Gold</span><span class="m" data-hex="gold">#C8A45E</span></li>
+    </ul>
+  </section>
+
   <footer class="foot"><span>&copy; 2026 Joey</span><a href="circuit.html">Draw a circuit</a></footer>
 </main>
 
-<div class="lane" aria-hidden="true"></div>
 <div class="drive" aria-hidden="true">
   <svg class="car" viewBox="0 0 56 16" width="56" height="16" focusable="false">
     <g fill="none" stroke="#1b2547" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
@@ -104,6 +99,7 @@
   </svg>
 </div>
 
+<script src="horizon.js"></script>
 <script src="site.js"></script>
 </body>
 </html>

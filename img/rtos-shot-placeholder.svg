@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300">
-  <!-- PLACEHOLDER for the Bare-metal RTOS screenshot. Replace with img/rtos-shot.png (see index.html). -->
-  <rect width="480" height="300" fill="#f3ecdc"/>
-  <g fill="none" stroke="#5d6479" stroke-width="1.5">
-    <path d="M24 44V24H44M436 24H456V44M456 256V276H436M44 276H24V256"/>
-  </g>
-  <text x="240" y="156" text-anchor="middle" fill="#5d6479" font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" letter-spacing="1.5">SCREENSHOT</text>
-</svg>
