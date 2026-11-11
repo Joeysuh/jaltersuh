@@ -13,18 +13,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@300..600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&text=Joey&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&text=Joey%20Suh&display=swap">
 <link rel="stylesheet" href="styles.css">
-<!-- Opening credits: once per browser session, never under reduced motion. Set before first paint so the page starts on black. -->
+<!-- The opening: once per browser session, never under reduced motion. Set before first paint so the page starts near-black. -->
 <script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){var k="joey-opened",s=null;try{s=sessionStorage.getItem(k);sessionStorage.setItem(k,"1")}catch(e){}if(!s)document.documentElement.classList.add("opening-on")}}catch(e){}</script>
 </head>
 <body>
 
-<!-- Director's cut: the opening (black, the name resolving out of blur) and the letterbox bars,
-     which slide away after the opening and squeeze in briefly when a painting changes. -->
-<div class="opening" aria-hidden="true">
-  <div class="opening-black"></div>
-  <p class="opening-name">Joey</p>
+<!-- The opening: near-black, then The Hay Wain paints itself in where the band sits (cinema.js),
+     the name arrives letter by letter and the car crosses. The letterbox bars squeeze in briefly
+     when a painting changes. -->
+<div class="opening">
+  <div class="opening-black" aria-hidden="true"></div>
+  <div class="opening-stage" aria-hidden="true">
+    <canvas class="opening-paint"></canvas>
+    <canvas class="opening-real"></canvas>
+    <div class="opening-wash"></div>
+  </div>
+  <div class="opening-title" aria-hidden="true">
+    <p class="opening-name"></p>
+    <div class="opening-road"></div>
+  </div>
+  <button class="opening-skip" type="button">Skip</button>
 </div>
 <div class="letterbox" aria-hidden="true"><i class="bar bar-top"></i><i class="bar bar-bottom"></i></div>
 
@@ -33,6 +43,8 @@
      Commons), a new one every 8s. horizon.js re-tints the page from each one. -->
 <div class="horizon" data-horizon>
   <div class="horizon-wash" aria-hidden="true"></div>
+  <!-- depth: a blurred copy of the painting sits behind it and moves a little less -->
+  <div class="horizon-back" aria-hidden="true"></div>
   <div class="horizon-art" aria-hidden="true">
     <div class="horizon-cam">
       <div class="horizon-frames"></div>
@@ -43,6 +55,8 @@
       <svg class="atmo birds" viewBox="0 0 90 30" width="72" height="24"><path d="M4 14q3-3 6 0q3-3 6 0"/><path d="M24 8q2.5-2.5 5 0q2.5-2.5 5 0"/><path d="M38 17q3-3 6 0q3-3 6 0"/><path d="M55 10q2.5-2.5 5 0q2.5-2.5 5 0"/><path d="M70 20q2-2 4 0q2-2 4 0"/></svg>
       <div class="atmo sheen"></div>
     </div>
+    <!-- a soft light that follows the cursor over the painting -->
+    <div class="horizon-light"></div>
   </div>
   <div class="horizon-meta">
     <div class="timeline" aria-hidden="true"><i></i></div>
@@ -106,16 +120,22 @@
 </main>
 
 <div class="drive" aria-hidden="true">
-  <svg class="car" viewBox="0 0 56 16" width="56" height="16" focusable="false">
-    <g fill="none" stroke="#1b2547" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+  <!-- the road: a dashed line along the car's path, and the loop it takes every third lap -->
+  <svg class="road" focusable="false"><path class="road-lap"/><path class="road-loop"/></svg>
+  <svg class="car car-art" viewBox="0 0 56 18.4" focusable="false">
+    <defs><radialGradient id="car-shade"><stop offset="0" stop-opacity=".3"/><stop offset=".6" stop-opacity=".14"/><stop offset="1" stop-opacity="0"/></radialGradient></defs>
+    <ellipse class="car-shadow" cx="27.5" cy="16.2" rx="27" ry="1.9"/>
+    <g class="ink">
       <path d="M1.4 2.8H7.8M1.6 4.3H7.2M2.2 2.8V9.6H6"/>
       <path d="M5 8L12.6 7.1Q15.6 6.6 16.6 4.4H19.7L21.9 6.7H29L37 8.3L50.2 10.4L53.6 11.4"/>
       <path d="M21.9 6.7Q25.2 3.6 29.2 6.5"/>
+      <path d="M23.2 6.6Q24.6 5 26.4 5.3"/>
       <path d="M14.8 9.9Q21 8.3 31 9.3"/>
+      <path d="M17.4 4.4V2.9H19.2"/>
       <path d="M6 13.3H47"/>
       <path d="M44.6 13.7H55.2M54.8 11.2V13.7"/>
-      <circle cx="9.6" cy="11.7" r="4.1" fill="#f3ecdc"/>
-      <circle cx="44" cy="12" r="3.8" fill="#f3ecdc"/>
+      <g class="wheel"><circle class="tyre" cx="9.6" cy="11.7" r="4.1"/><circle cx="9.6" cy="11.7" r="1.25"/><path d="M9.6 8.6V10.45M12.28 13.25L10.68 12.33M6.92 13.25L8.52 12.33"/></g>
+      <g class="wheel"><circle class="tyre" cx="44" cy="12" r="3.8"/><circle cx="44" cy="12" r="1.15"/><path d="M44 9.15V10.85M46.47 13.43L45 12.58M41.53 13.43L43 12.58"/></g>
     </g>
   </svg>
 </div>

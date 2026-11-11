@@ -17,6 +17,7 @@
   if (!band) return;
   var root = document.documentElement;
   var art = band.querySelector(".horizon-frames");        /* paintings stack here, under the atmosphere layers */
+  var back = band.querySelector(".horizon-back");         /* a blurred copy of each painting, behind it */
   var sheen = band.querySelector(".sheen");
   var fill = band.querySelector(".timeline i");
   var bars = document.querySelectorAll(".letterbox .bar");
@@ -371,6 +372,19 @@
                   { duration: 1800, delay: 900, easing: "cubic-bezier(.45,0,.25,1)" });
   }
 
+  /* depth: a tiny copy of the painting, scaled up and blurred in CSS, crossfades behind it */
+  function backdrop(im) {
+    if (!back) return;
+    var c = document.createElement("canvas");
+    c.width = 96; c.height = Math.max(1, Math.round(96 * im.naturalHeight / im.naturalWidth));
+    try { c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); } catch (e) { return; }
+    var old = back.querySelectorAll("canvas");
+    back.appendChild(c);
+    void c.offsetWidth;
+    c.classList.add("is-on");
+    setTimeout(function () { old.forEach(function (o) { if (o.parentNode) o.parentNode.removeChild(o); }); }, still.matches ? 0 : FADE_MS + 100);
+  }
+
   function show(p) {
     return load(p).then(function (im) {
       if (!calm(p, im)) { p.img = null; throw new Error("not calm"); }
@@ -378,6 +392,7 @@
       im.className = "";
       drift(im);
       art.appendChild(im);                       /* newest sits on top and fades in over the old one */
+      backdrop(im);
       void im.offsetWidth;
       im.classList.add("is-on");
       var old = front, oldP = current;
@@ -414,7 +429,7 @@
   }
   function schedule() {
     stopClock();
-    if (still.matches || !fill || !fill.animate) return;
+    if (opening || still.matches || !fill || !fill.animate) return;   /* the clock starts when the opening lifts */
     run = fill.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: ROTATE_MS, easing: "linear", fill: "forwards" });
     run.onfinish = function () { run = null; advance(); };
     if (document.hidden || held) run.pause();
@@ -440,9 +455,24 @@
   document.addEventListener("visibilitychange", function () { if (!run) return; if (document.hidden) run.pause(); else if (!held) run.play(); });
   (still.addEventListener ? still.addEventListener.bind(still, "change") : still.addListener.bind(still))(schedule);
 
-  /* first painting: ask every source at once and take a random one from
-     whichever answers first; stand-ins if none answers within 2.5s */
+  /* When the opening plays (cinema.js), the first painting is The Hay Wain: the
+     opening paints it stroke by stroke and resolves into this real one. The
+     loaded image is handed over through a promise, and the 8s clock waits for
+     the opening to lift. */
+  var opening = root.classList.contains("opening-on");
   var started = false;
+  if (opening) {
+    var hay = standIns().filter(function (q) { return q.key === "wm:0"; })[0];
+    window.joeyOpening = load(hay).then(function (im) { return { img: im, sampled: !!hay.cors }; });
+    window.joeyOpening.catch(function () {});
+    queue.unshift(hay);
+    started = true;
+    advance();
+    document.addEventListener("joey:opened", function () { opening = false; if (current) schedule(); }, { once: true });
+  }
+
+  /* first painting otherwise: ask every source at once and take a random one
+     from whichever answers first; stand-ins if none answers within 2.5s */
   function begin() { if (started) return; started = true; advance(); }
   SOURCES.forEach(function (src, k) {
     src().then(function (list) { if (enqueue(list)) begin(); }, function () { strikes[k]++; });

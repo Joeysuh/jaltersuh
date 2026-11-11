@@ -15,6 +15,7 @@
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --serif:"Newsreader",ui-serif,Georgia,serif;   /* the nameplate only */
   --col:600px; --gap:44px; --pad:20px;
+  --car-w:clamp(84px,13vw,172px);   /* the F1 car: about three times its old 56px, smaller on phones */
   /* motion curves: Apple's ease-out, and a gentle spring (response .5s, damping .82, about 1% overshoot) */
   --ease-apple:cubic-bezier(0,0,.58,1);
   --spring:linear(0,0.0697,0.2211,0.3947,0.5578,0.6951,0.8024,0.881,0.9355,0.971,0.9924,1.0042,1.0096,1.0111,1.0105,1.0088,1.0069,1.0051,1.0035,1.0023,1.0014,1.0008,1.0004,1.0001,1);
@@ -61,6 +62,18 @@ html.home body{background:linear-gradient(to bottom,
           mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.2) 82%,transparent 100%)}
 .horizon-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 42%;opacity:0}
 .horizon-art img.is-on{opacity:1}
+/* depth: a blurred copy of the painting behind it. It shows through where the painting dissolves,
+   so the fade reads as focus falling off, and it moves a little less than the painting (pointer and scroll) */
+.horizon-back{position:absolute;inset:0;overflow:hidden;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 44%,rgba(0,0,0,.5) 64%,transparent 80%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 44%,rgba(0,0,0,.5) 64%,transparent 80%)}
+.horizon-back canvas{position:absolute;left:-8%;top:-8%;width:116%;height:116%;object-fit:cover;object-position:50% 42%;filter:blur(30px) saturate(1.08);opacity:0;
+  transform:translate3d(calc(var(--lean-x,0) * -4px),calc(var(--lean-y,0) * -3px),0)}
+.horizon-back canvas.is-on{opacity:.85}
+/* a soft light that follows the cursor over the painting (cinema.js moves it; mouse and trackpad only) */
+.horizon-light{position:absolute;left:0;top:0;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side,rgba(255,244,220,.62),rgba(255,244,220,.22) 46%,transparent 74%);mix-blend-mode:soft-light}
+.horizon-light.is-on{opacity:1}
 /* a faint sage/gold wash carries the painting a little further than the image */
 .horizon-wash{position:absolute;left:0;right:0;top:0;height:calc(100% + 45vh);pointer-events:none;
   background:radial-gradient(90% 55% at 18% 70%,color-mix(in srgb,var(--sage) 24%,transparent),transparent 72%),
@@ -75,7 +88,7 @@ html.home body{background:linear-gradient(to bottom,
 .credit a{display:inline-block;padding:14px 0;margin:-14px 0;color:var(--fg);text-decoration:none}
 .credit a:hover{text-decoration:underline;text-underline-offset:.25em}
 .horizon + .col{position:relative;z-index:1;padding-top:36px}   /* text always sits above the dollying band */
-@media (prefers-color-scheme:dark){html.home .horizon-art img{filter:brightness(.8) saturate(.92)}}
+@media (prefers-color-scheme:dark){html.home .horizon-art img,html.home .opening-stage{filter:brightness(.8) saturate(.92)}html.home .horizon-back canvas{filter:blur(30px) brightness(.8) saturate(.95)}}
 
 /* ---- director's cut: one cinematic layer, kept quiet ----
    camera (leans with the pointer, eased) > frames (paintings) + atmosphere */
@@ -85,30 +98,48 @@ html.home body{background:linear-gradient(to bottom,
 .timeline{align-self:stretch;flex-basis:auto;height:1px;background:color-mix(in srgb,var(--rule) 80%,transparent);overflow:hidden}
 .timeline i{display:block;height:100%;background:var(--gold);transform:scaleX(0);transform-origin:right}
 
-/* opening credits (first load per session): black, letterbox, the name resolving out of blur, then the bars slide away */
+/* the opening (first load per session): near-black, then The Hay Wain paints itself in where the band sits,
+   the name arrives letter by letter, the car crosses, and it lifts. cinema.js draws the strokes and keeps time. */
 .opening{display:none}
 .letterbox{position:fixed;inset:0;z-index:9;pointer-events:none}
 .letterbox .bar{position:absolute;left:0;right:0;height:11vh;background:#000;transform:scaleY(0)}
 .bar-top{top:0;transform-origin:top}
 .bar-bottom{bottom:0;transform-origin:bottom}
-html.opening-on .opening{display:block;position:fixed;inset:0;z-index:10;cursor:pointer}
-.opening-black{position:absolute;inset:0;background:#000}
-.opening-name{position:absolute;inset:0;margin:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(2.75rem,8vw,5rem);font-weight:400;letter-spacing:.005em;color:#f3ecdc}
-html.opening-on .letterbox .bar{transform:none}
-html.opening-on .opening-black{animation:open-black 2.5s linear forwards}
-html.opening-on .opening-name{animation:open-name 2.5s cubic-bezier(.25,.6,.25,1) forwards}
-html.opening-on .bar-top{animation:bar-top-away 2.5s var(--ease-apple) forwards}
-html.opening-on .bar-bottom{animation:bar-bottom-away 2.5s var(--ease-apple) forwards}
-html.opening-skip .opening-black,html.opening-skip .opening-name{animation:open-skip .3s ease-out forwards}
-html.opening-skip .bar-top{animation:bar-top-skip .45s var(--ease-apple) forwards}
-html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) forwards}
-@keyframes open-black{0%,56%{opacity:1}80%,100%{opacity:0}}
-@keyframes open-name{0%{opacity:0;filter:blur(14px);transform:scale(1.08)}44%{opacity:1;filter:blur(0);transform:scale(1.015)}58%{opacity:1;filter:blur(0);transform:scale(1)}80%,100%{opacity:0;filter:blur(3px);transform:translateY(-6px)}}
-@keyframes bar-top-away{0%,78%{transform:translateY(0)}100%{transform:translateY(-100%)}}
-@keyframes bar-bottom-away{0%,78%{transform:translateY(0)}100%{transform:translateY(100%)}}
-@keyframes open-skip{to{opacity:0}}
-@keyframes bar-top-skip{from{transform:translateY(0)}to{transform:translateY(-100%)}}
-@keyframes bar-bottom-skip{from{transform:translateY(0)}to{transform:translateY(100%)}}
+html.opening-on .opening{display:block;position:fixed;inset:0;z-index:10;overflow:hidden;cursor:pointer;animation:open-failsafe .6s linear 9s forwards}
+html.opening-on .horizon-cam{transform:none;transition:none}   /* the camera holds still so the painted canvas lines up with the real painting */
+.opening-black{position:absolute;inset:0;background:#0b0c10}
+/* the stage sits exactly over the band and dissolves the same way; one mask for all its layers, so nothing shows through the fade */
+.opening-stage{position:absolute;left:0;top:0;width:100%;height:clamp(320px,62vh,640px);overflow:hidden;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.2) 82%,transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 40%,rgba(0,0,0,.62) 62%,rgba(0,0,0,.2) 82%,transparent 100%)}
+.opening-paint,.opening-real,.opening-wash{position:absolute;inset:0;width:100%;height:100%}
+.opening-real{opacity:0;transition:opacity .7s var(--ease-apple)}
+.opening.is-real .opening-real{opacity:1}
+.opening-wash{opacity:0;background:linear-gradient(100deg,transparent 26%,rgba(255,214,150,.42) 50%,transparent 74%);mix-blend-mode:screen}
+.opening.is-wash .opening-wash{animation:open-wash 1s var(--ease-apple) both}
+.opening-title{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.opening-name{margin:0;font-family:var(--serif);font-size:clamp(2.5rem,7vw,4.25rem);font-weight:400;letter-spacing:.005em;line-height:1.1;color:#f3ecdc;white-space:pre;text-shadow:0 1px 22px rgba(0,0,0,.5)}
+.opening-name span{display:inline-block;opacity:0;transform:translateY(.16em);filter:blur(5px)}
+.opening.is-named .opening-name span{animation:open-letter .5s var(--ease-apple) calc(var(--i) * 65ms) both}
+.opening-road{position:relative;width:100%;height:calc(var(--car-w) * .33);margin-top:14px}
+.opening-road::after{content:"";position:absolute;left:0;right:0;bottom:calc(var(--car-w) * .0464);height:1.5px;opacity:0;
+  background:repeating-linear-gradient(90deg,rgba(243,236,220,.4) 0 10px,transparent 10px 26px);transition:opacity .5s var(--ease-apple)}
+.opening.is-driving .opening-road::after{opacity:1}
+.opening-car{position:absolute;left:0;bottom:0;display:block;width:var(--car-w);height:auto;overflow:visible;transform:translateX(-110%)}
+.opening .opening-car .ink{stroke:#f3ecdc}
+.opening .opening-car .tyre{fill:#0b0c10}
+.opening .opening-car .car-shadow{display:none}
+.opening.is-driving .opening-car{animation:open-drive 1.4s cubic-bezier(.35,.1,.45,1) both}
+.opening-skip{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));min-width:44px;min-height:44px;padding:0 14px;border:0;background:none;
+  font-family:var(--mono);font-size:.75rem;color:rgba(243,236,220,.74);cursor:pointer}
+.opening-skip:hover{color:#f3ecdc}
+.opening-skip:focus-visible{outline:2px solid #f3ecdc;outline-offset:-6px}
+.opening.is-lifting{opacity:0;pointer-events:none;transition:opacity .65s var(--ease-apple)}
+.opening.is-lifting.is-skipped{transition-duration:.3s}
+@keyframes open-wash{0%{opacity:0;transform:translateX(-40%)}40%{opacity:1}100%{opacity:0;transform:translateX(40%)}}
+@keyframes open-letter{to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes open-drive{from{transform:translateX(-110%)}to{transform:translateX(100vw)}}
+@keyframes open-failsafe{to{opacity:0;visibility:hidden}}
 
 /* ---- intro ---- */
 /* one contrasting serif accent: the nameplate, nothing else */
@@ -184,11 +215,20 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
 .foot a{display:inline-block;padding:14px 0;margin:-14px 0;text-underline-offset:.25em}   /* 44px target */
 .foot a:hover{color:var(--fg)}
 
-/* ---- the F1 car: laps the viewport edge (site.js), wheels on the outside, coloured by the theme ---- */
+/* ---- the F1 car: laps the viewport edge on a dashed road (site.js), wheels on the outside, coloured by the theme ---- */
 .drive{position:fixed;inset:0;z-index:4;overflow:hidden;pointer-events:none}
-.car{position:absolute;left:0;top:0;display:block;visibility:hidden;offset-anchor:50% 100%;offset-rotate:auto}
-.car g{stroke:var(--fg)}
-.car circle{fill:var(--bg)}
+.road{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0}
+.drive.is-on .road{opacity:1}
+.road path{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:10 16;stroke-linecap:round;opacity:.38}
+.road .road-loop{opacity:0}
+.car{position:absolute;left:0;top:0;display:block;width:var(--car-w);height:auto;overflow:visible;visibility:hidden;offset-anchor:50% 85.87%;offset-rotate:auto}
+.car-art .ink{fill:none;stroke:var(--fg);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round}
+.car-art .ink path,.car-art .ink circle{vector-effect:non-scaling-stroke}
+.car-art .tyre{fill:var(--bg)}
+.car-art .car-shadow{fill:url(#car-shade)}
+#car-shade stop{stop-color:var(--fg)}
+@media (prefers-color-scheme:dark){html.home #car-shade stop{stop-color:#000}}
+.car-art .wheel{transform-box:fill-box;transform-origin:center}
 
 /* ---- circuit page: the whole viewport is the drawing surface ---- */
 .circuit-page{overflow:hidden;overscroll-behavior:none}
@@ -210,6 +250,10 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
 @media (prefers-reduced-motion:no-preference){
   /* painting crossfade 0.8s; the page takes the new palette in one step, no wash */
   .horizon-art img{transition:opacity .8s var(--ease-apple),filter .6s var(--ease-apple)}
+  .horizon-back canvas{transition:opacity .8s var(--ease-apple),transform 1.4s var(--spring)}
+  .horizon-light{transition:opacity .7s var(--ease-apple),transform .55s var(--spring);will-change:transform}
+  .road{transition:opacity .8s var(--ease-apple)}
+  .car-art .wheel{animation:wheel .62s linear infinite}
   .list li::after{transition:transform .8s var(--spring)}
 
   /* Ken Burns: a very slow zoom and one drift per painting (direction set in horizon.js),
@@ -236,6 +280,7 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
     .intro h1{animation:nameplate linear both;animation-timeline:scroll(root);animation-range:0 70vh}
     /* scrolling dollies the backdrop a little slower than the page */
     .horizon-art{animation:dolly linear both;animation-timeline:scroll(root);animation-range:0 100vh}
+    .horizon-back{animation:dolly-back linear both;animation-timeline:scroll(root);animation-range:0 100vh}   /* further away, so slower still */
     .label{animation:label-weight linear both,line-in linear both;animation-timeline:view(),view();animation-range:entry 0% cover 45%,entry 0% cover 12%}
     .list .t,.list .m,.palette li,.foot > *{animation:line-in linear both;animation-timeline:view();animation-range:entry 0% cover 12%}
     .foot > *{animation-range:entry 0% entry 100%}   /* the page ends here, so finish as soon as it is fully in view */
@@ -249,6 +294,8 @@ html.opening-skip .bar-bottom{animation:bar-bottom-skip .45s var(--ease-apple) f
 @keyframes birds{0%{translate:-12vw 0}38%,100%{translate:110vw -3vh}}
 @keyframes flap{to{transform:scaleY(.45)}}
 @keyframes dolly{to{translate:0 16vh}}
+@keyframes dolly-back{to{translate:0 20vh}}
+@keyframes wheel{to{transform:rotate(360deg)}}
 @keyframes nameplate{from{font-weight:560}to{font-weight:400}}
 @keyframes label-weight{from{font-weight:300}to{font-weight:500}}
 @keyframes line-in{from{opacity:0;transform:translateY(.4em);clip-path:inset(100% 0 0 0)}to{opacity:1;transform:none;clip-path:inset(0)}}
@@ -262,4 +309,5 @@ html.home body::after{content:"";position:fixed;inset:0;z-index:3;pointer-events
 @media (prefers-reduced-motion:reduce){
   .timeline{display:none}
   .drive{display:none}
+  .horizon-light{display:none}
 }

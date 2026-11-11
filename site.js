@@ -6,55 +6,82 @@
   var CHAT_ENDPOINT = "";
 
   /* ---------------------------------------------------------------- F1 car
-     Laps the edge of the screen every 30s: along the bottom, up the right
-     wall, across the top upside down, down the left wall. The path is a
-     rounded rectangle, so it turns smoothly through the corners, and the car
-     keeps its wheels on the outside edge. It eases through the lap instead of
-     holding one speed: it comes out of each corner, swells down the straight
-     and settles into the next corner, with speed continuous at every join.
-     Off under reduced motion; frozen while the tab is hidden. */
+     Laps the edge of the screen every 30s on a dashed road: along the bottom,
+     up the right wall, across the top upside down, down the left wall. The
+     path is a rounded rectangle, so it turns smoothly through the corners,
+     and the car keeps its wheels on the outside edge. It eases through the
+     lap instead of holding one speed: it comes out of each corner, swells
+     down the straight and settles into the next corner, with speed continuous
+     at every join. Every third lap it takes a loop-the-loop halfway along the
+     bottom; the loop's road fades in for that pass only. Waits for the
+     opening to lift. Off under reduced motion; frozen while the tab is hidden. */
   (function () {
     var car = document.querySelector(".car");
     var layer = document.querySelector(".drive");
-    if (!car || !layer || !car.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var roadLap = document.querySelector(".road-lap"), roadLoop = document.querySelector(".road-loop");
+    if (!car || !layer || !roadLap || !roadLoop || !car.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!(window.CSS && CSS.supports && CSS.supports("offset-path", 'path("M0 0H1")'))) return;
 
-    var LAP_MS = 30000, R = 44, E = 1;
-    var CORNER = 0.55;                                   /* corner speed as a share of a straight's average */
-    var STRAIGHT = "cubic-bezier(.4,.22,.6,.78)";        /* starts and ends at corner speed (slope .55) */
+    var LAP_MS = 30000, E = 10;                          /* how far in from the edge the road runs */
+    var CORNER = 0.55, LOOP = 0.9;                       /* speed through a corner and round the loop, as shares of a straight's average */
+    /* a straight that starts at speed a and ends at speed b */
+    function ease(a, b) { return "cubic-bezier(.4," + (a * .4).toFixed(3) + ",.6," + (1 - b * .4).toFixed(3) + ")"; }
 
-    function frames() {
-      var W = layer.clientWidth, H = layer.clientHeight, r = Math.min(R, W / 4, H / 4);
-      var h = W - 2 * r, v = H - 2 * r, c = Math.PI * r / 2;
-      var segs = [[h, 1], [c, 0], [v, 1], [c, 0], [h, 1], [c, 0], [v, 1], [c, 0]];
-      var len = 0, time = 0, kf = [], d = 0, t = 0;
-      segs.forEach(function (sg) { len += sg[0]; time += sg[1] ? sg[0] : sg[0] / CORNER; });
-      segs.forEach(function (sg) {
-        kf.push({ offsetDistance: (d / len * 100) + "%", offset: t / time, easing: sg[1] ? STRAIGHT : "linear" });
-        d += sg[0]; t += sg[1] ? sg[0] : sg[0] / CORNER;
-      });
-      kf.push({ offsetDistance: "100%", offset: 1 });
-      return kf;
-    }
-
-    function lap() {
-      var W = layer.clientWidth, H = layer.clientHeight, r = Math.min(R, W / 4, H / 4);
+    function build(withLoop) {
+      var W = layer.clientWidth, H = layer.clientHeight;
+      var cw = Math.max(84, Math.min(172, W * 0.13));    /* the car's width, as set in CSS (--car-w) */
+      var r = Math.round(Math.min(cw * 0.56, W / 4, H / 4)), L = Math.round(cw * 0.7);   /* corner and loop radii scale with the car */
+      var x0 = E + r, x1 = W - E - r, y0 = E + r, y1 = H - E - r, B = H - E, Rt = W - E, m = Math.round((x0 + x1) / 2);
+      var h = x1 - x0, v = y1 - y0, c = Math.PI * r / 2, S = ease(CORNER, CORNER);
+      var loop = withLoop && H > 2 * L + cw && h > 2 * L + cw;
       function arc(x, y) { return "A" + r + " " + r + " 0 0 0 " + x + " " + y; }
-      return 'path("M' + r + " " + (H - E) + "H" + (W - r) + arc(W - E, H - r) +
-        "V" + r + arc(W - r, E) + "H" + r + arc(E, r) + "V" + (H - r) + arc(r, H - E) + 'Z")';
+      var ring = "A" + L + " " + L + " 0 1 0 " + m + " " + (B - 2 * L) + "A" + L + " " + L + " 0 1 0 " + m + " " + B;
+      var segs = loop ? [[m - x0, ease(CORNER, LOOP), 1], [2 * Math.PI * L, "linear", LOOP], [x1 - m, ease(LOOP, CORNER), 1]] : [[h, S, 1]];
+      segs.push([c, "linear", CORNER], [v, S, 1], [c, "linear", CORNER], [h, S, 1], [c, "linear", CORNER], [v, S, 1], [c, "linear", CORNER]);
+      var len = 0, time = 0, kf = [], d = 0, t = 0;
+      segs.forEach(function (sg) { len += sg[0]; time += sg[0] / sg[2]; });
+      segs.forEach(function (sg) { kf.push({ offsetDistance: (d / len * 100) + "%", offset: t / time, easing: sg[1] }); d += sg[0]; t += sg[0] / sg[2]; });
+      kf.push({ offsetDistance: "100%", offset: 1 });
+      return {
+        path: "M" + x0 + " " + B + (loop ? "H" + m + ring : "") + "H" + x1 + arc(Rt, y1) + "V" + y0 + arc(x1, E) + "H" + x0 + arc(E, y0) + "V" + y1 + arc(x0, B) + "Z",
+        ring: "M" + m + " " + B + ring, frames: kf, time: time, loop: loop,
+        enter: loop ? kf[1].offset : 0, exit: loop ? kf[2].offset : 0
+      };
     }
 
-    car.style.offsetPath = lap();
-    car.style.visibility = "visible";
-    var anim = car.animate(frames(), { duration: LAP_MS, iterations: Infinity });
+    var lapN = 0, anim = null, ringAnim = null, SHOWN = 0.38;
+    function run(progress) {
+      var g = build(lapN % 3 === 2), plain = g.loop ? build(false) : g, ms = LAP_MS * g.time / plain.time;
+      car.style.offsetPath = 'path("' + g.path + '")';
+      roadLap.setAttribute("d", plain.path);
+      if (anim) { anim.onfinish = null; anim.cancel(); }
+      if (ringAnim) { ringAnim.cancel(); ringAnim = null; }
+      anim = car.animate(g.frames, { duration: ms });
+      anim.onfinish = function () { lapN++; run(0); };
+      if (g.loop) {                                      /* the loop's road is there only while the car needs it */
+        roadLoop.setAttribute("d", g.ring);
+        ringAnim = roadLoop.animate([{ opacity: 0, offset: 0 }, { opacity: 0, offset: Math.max(0, g.enter - .07) }, { opacity: SHOWN, offset: Math.max(.001, g.enter - .02) },
+          { opacity: SHOWN, offset: g.exit + .01 }, { opacity: 0, offset: Math.min(.999, g.exit + .06) }, { opacity: 0, offset: 1 }], { duration: ms });
+      }
+      if (progress) { anim.currentTime = progress * ms; if (ringAnim) ringAnim.currentTime = progress * ms; }
+      if (document.hidden) { anim.pause(); if (ringAnim) ringAnim.pause(); }
+    }
+    function go() {
+      layer.classList.add("is-on");
+      car.style.visibility = "visible";
+      car.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700, easing: "ease-out" });
+      run(0);
+    }
+    if (document.documentElement.classList.contains("opening-on")) document.addEventListener("joey:opened", go, { once: true });
+    else go();
 
     var t = 0;
     window.addEventListener("resize", function () {
       clearTimeout(t);
-      t = setTimeout(function () { car.style.offsetPath = lap(); anim.effect.setKeyframes(frames()); }, 100);
+      t = setTimeout(function () { if (anim) run((anim.currentTime || 0) / anim.effect.getTiming().duration); }, 100);
     });
     document.addEventListener("visibilitychange", function () {
-      if (document.hidden) anim.pause(); else anim.play();
+      [anim, ringAnim].forEach(function (a) { if (a) { if (document.hidden) a.pause(); else a.play(); } });
     });
   })();
 

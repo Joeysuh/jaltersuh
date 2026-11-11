@@ -28,12 +28,12 @@ Base values. On the home page they are re-tinted from the current painting (see 
 | `--sage`, `--gold` | `#9aa27c`, `#c8a45e` (washes and tints only, never text) |
 | Accent (only one) | Tesla red `#e31937`, used ONLY on the chat send arrow. It never re-tints. Nowhere else: not links, not hover, not focus, not the car, not the credit. |
 
-- Type: Geist for body, Geist Mono for small labels, and one contrasting serif accent: Newsreader (variable), for the "Joey" nameplate only (loaded subset to those four letters). No other fonts.
+- Type: Geist for body, Geist Mono for small labels, and one contrasting serif accent: Newsreader (variable), for the "Joey" nameplate and the name in the opening only (loaded subset to the letters of "Joey Suh"). No other fonts.
 - Type scale, SF-style: nameplate 28 (Title 1, serif), body 17 for the lede, the ask field and row names, 15 for previews and chat lines, 13 for section labels, 12 for tags, credit, notes and the footer. Slight negative tracking (-0.01em) on 17px text.
 - Layout: one centered column, 560-640px wide (currently 600px), 35-50px gaps between blocks (currently 44px).
-- Every tap target is at least 44x44px (socials, send, rows, credit and footer links), with the hit area extended invisibly where the visual is smaller.
+- Every tap target is at least 44x44px (socials, send, rows, credit and footer links, the opening's Skip), with the hit area extended invisibly where the visual is smaller.
 - Glass, as a finish on two small surfaces only: the ask box and the row preview cards. The ask box over flat paper is the reference for how all of them read. Material: a fixed warm white, `rgba(251,248,241,.88)`, that never re-tints with the painting (dusk: `rgba(30,30,34,.86)`), backdrop blur 20px with no saturation boost, a fixed warm hairline edge, a top highlight and one soft shadow, radius 14px or a capsule. Without backdrop-filter support the glass goes nearly opaque. The page itself stays cream paper, never a glass sheet, and nothing else gets glass, boxes or shadows.
-- Gradients exist only in the band: its dissolve mask, its sage/gold wash, the soft page tint (see Horizon band), and the director's-cut atmosphere inside the painting (cloud shadows, light ray, glass sheen). Nowhere else.
+- Gradients exist only in the band and the opening that paints it: its dissolve mask, its sage/gold wash, the soft page tint (see Horizon band), the cursor light, the director's-cut atmosphere inside the painting (cloud shadows, light ray, glass sheen) and the opening's warm wash. Nowhere else (the car's ground shadow is the one small exception).
 - Tactile grain: a barely-there SVG noise layer over the home page (multiply at 7%, soft-light at 10% in dark mode) so it reads as printed paper. If it ever looks dirty, remove it rather than strengthening it.
 - Dark mode exists on the home page only, as a dusk version of each painting's palette. The circuit page stays cream.
 
@@ -58,12 +58,13 @@ Base values. On the home page they are re-tinted from the current painting (see 
 - Calm check on the loaded image, before it is shown: landscape-shaped (1.2 to 2.6), and, when CORS allows sampling, mean chroma 0.36 or less and mean lightness 0.25 to 0.9. Anything that fails is skipped silently.
 - Fallbacks, used when no source answers within 2.5s, when every source fails, or after 8 skips in a row; live paintings take over as soon as one arrives: Constable "The Hay Wain", Constable "Stoke-by-Nayland" (in place of the Abby Matthews piece, which isn't public domain), Corot "River with a Distant Tower", Corot "The Vire at Saint-Lô". All public domain, hosted on Wikimedia Commons (a different host from the live pull). They can be bundled into `img/` later.
 - Every painting shows its credit as a wall label: plain mono text (12px, muted, title in ink), right-aligned to the column at the foot of the painting, where it dissolves into the page, 18px above the band's bottom edge. Title (linked to its museum page), date, artist. No chip, no glass. "Joey" owns the left edge, the credit the right. Two-line credits wrap balanced, and the separator dot stays with the date. The gold clock line sits just above it, spanning the column and filling from the right.
+- Depth, kept calm: a blurred copy of the current painting (a tiny canvas scaled up, blur 30px) sits behind it and shows through where the painting dissolves, so the fade reads as focus falling off before it reaches paper. It is gone by 80% of the band's height, so it never sits behind the credit. The pointer leans the painting about 10px and the backdrop about 4px, and scrolling moves the backdrop a little slower than the painting, which is where the parallax comes from. A soft warm light (620px, soft-light) follows the cursor over the painting. Mouse and trackpad only; none of it runs under reduced motion (the backdrop stays, still).
 - The painting never ends in a hard line: a mask dissolves it down the viewport, a faint sage/gold wash carries a little further, and a soft tint continues down the page behind Work and Experience before settling into flat paper.
 - A thin gold line above the credit is the clock: it fills once per painting (8s) and the next painting comes in when it finishes. Rotation and line pause together while the pointer or focus is on the credit and while the tab is hidden. Under `prefers-reduced-motion` there is no rotation and no line: one random painting per visit, with its credit.
 
 ## Adaptive theme
 
-- Each painting is sampled on a small canvas: lightest tone becomes paper, darkest becomes ink, then muted, rule, and sage/gold accents. Ink is pushed to at least 12:1 and muted to at least 6.5:1 against paper, in both light and dusk, so muted text still clears 4.5:1 (WCAG AA) where it actually sits: on the tints, the capsules and the glass. Measured in place, the lowest is the credit's muted text at the foot of the painting: about 4.7 to 5.3:1, and no pixel behind it below 4.5:1 in light or dusk.
+- Each painting is sampled on a small canvas: lightest tone becomes paper, darkest becomes ink, then muted, rule, and sage/gold accents. Ink is pushed to at least 12:1 and muted to at least 6.5:1 against paper, in both light and dusk, so muted text still clears 4.5:1 (WCAG AA) where it actually sits: on the tints, the capsules and the glass. Measured in place, the lowest is the credit's muted text at the foot of the painting: about 4.9 to 5.4:1, and about 4.5:1 at the single worst pixel behind it in dusk.
 - The theme re-tints everything through the CSS variables (paper, text, hairlines, chat, the car, the palette swatches; not the glass, which stays fixed). It changes in one step at the cut, with no transition, and only while the reader is up at the band: scrolled down to the rows, the page keeps its colours until the next cut seen at the top. Never wash a colour change across the page while someone is reading.
 - Dark mode (`prefers-color-scheme: dark`) uses the dusk version of the same palette.
 - If an image can't be sampled (no CORS), it uses that painting's preset palette.
@@ -72,19 +73,23 @@ Base values. On the home page they are re-tinted from the current painting (see 
 
 One cinematic layer, kept quiet: it should feel like a film, not a trailer.
 
-- Opening credits, once per browser session (sessionStorage; a small head script sets `.opening-on` before first paint): black screen inside thin letterbox bars, "Joey" in the serif resolves out of a blur and a slow zoom, fades up into the painting, then the bars slide away. About 2.5s. A click, tap or key skips straight to the bars leaving. Just the name, no other copy. No replay, no toggle.
+- The opening, once per browser session (sessionStorage; a small head script sets `.opening-on` before first paint): the screen starts near-black (`#0b0c10`), then Constable's "The Hay Wain" paints itself in exactly where the band sits. Brushstrokes are small bundles of bristles coloured from the painting itself: broad sky strokes first, then the land, then small detail strokes that follow the painting's edges. A warm wash of light crosses, the strokes resolve into the real painting (drawn where the band shows it, so the lift is seamless), "Joey Suh" arrives letter by letter in the serif, and the F1 car crosses under it on a dashed line. Then it lifts on its own, about 4.3s after the painting loads. The band starts on The Hay Wain on those visits and its 8s clock waits for the lift; the stream continues as usual afterwards.
+- A small "Skip" (mono, bottom right, 44px target) is visible throughout; a click, tap or key anywhere also ends it, and so does scrolling or resizing. If the painting is slow (2.6s), fails or can't be sampled, only the name and the car play. Just the name, no other copy. No replay, no toggle, no letterbox bars in the opening. It should stay brief and calm: a portfolio, not a trailer.
 - Ken Burns: each painting zooms very slowly and gently (1.03 to 1.065 over 22s) and drifts about 1% in one direction, never the same direction twice in a row, with a tiny settle (under 0.1deg) as it lands. No flicker layer: the old soft-light projector flicker read as the site flickering and was removed; do not bring it back.
 - On each cut the outgoing print racks out of focus (5px blur) while the new one lands, and the letterbox bars squeeze in briefly (about 1.2vh, 1.1s), only while the band is on screen.
 - The painting is alive at half strength: cloud shadows drifting across the field (80s loop), a soft warm light ray every 17s, six pollen motes, a small flock of birds crossing the sky every 25s, and a faint gallery-glass sheen once per painting.
-- The pointer leans the camera a few pixels around the frame (mouse and trackpad only, eased). Scrolling dollies the backdrop: the painting moves 16vh slower than the page over the first screen (CSS scroll timeline). No other camera moves.
-- No audio, no extra parallax layers. All of it is off under `prefers-reduced-motion`. If anything here starts to read as busy, cut the weakest piece (first candidate: the letterbox squeeze) rather than adding more.
+- The pointer leans the camera a few pixels around the frame and carries the cursor light (mouse and trackpad only, eased). Scrolling dollies the band: the painting moves 16vh slower than the page over the first screen and its blurred backdrop 20vh (CSS scroll timeline). No other camera moves.
+- No audio, and no parallax layers beyond the one blurred backdrop. All of it is off under `prefers-reduced-motion`. If anything here starts to read as busy, cut the weakest piece (first candidate: the letterbox squeeze) rather than adding more.
 
 ## The F1 car
 
-- Small single-colour line-art open-wheel F1 silhouette, about 56px wide, inline SVG, drawn in the theme's ink (wheel centres in paper).
-- It laps the whole screen every 30s: along the bottom, up the right wall, across the top upside down, down the left wall, turning smoothly through rounded corners, wheels always on the outside edge. It eases through the lap: slower in the corners, swelling down each straight, with speed continuous at every join (roughly 70 to 210px/s on desktop). No sound, no trail.
-- Driven by `site.js` (Web Animations API with `offset-path`). Off under `prefers-reduced-motion`; paused when the tab is hidden. Browsers without `offset-path` get no car.
-- Stays flat SVG line art. A 3D test (img2threejs idea, done code-only as a faint offset far-side outline) made it read muddy at 56px and was dropped. No Three.js.
+- Single-colour line-art open-wheel F1 silhouette, inline SVG, drawn in the theme's ink at 1.5px (wheel centres in paper). About three times its old 56px: `--car-w: clamp(84px, 13vw, 172px)`, so 172px on desktop and 84px on a phone.
+- Its wheels spin (three spokes each), it carries a soft ground shadow, and it drives on a dashed road line (muted, 38%) drawn along its whole path, 10px in from the screen edge.
+- It laps the whole screen every 30s: along the bottom, up the right wall, across the top upside down, down the left wall, turning smoothly through rounded corners, wheels always on the outside edge. It eases through the lap: slower in the corners, swelling down each straight, with speed continuous at every join. No sound, no trail.
+- Every third lap it takes a loop-the-loop halfway along the bottom straight (radius 0.7 of the car's width, riding the inside of the loop). The loop's dashed road fades in for that pass only. Skipped when the screen is too small for it.
+- The same drawing crosses under the name during the opening; the lap starts when the opening lifts.
+- Driven by `site.js` (Web Animations API with `offset-path`, one animation per lap). Off under `prefers-reduced-motion` (car and road hidden); paused when the tab is hidden. Browsers without `offset-path` get no car.
+- Stays flat SVG line art. A 3D test (img2threejs idea, done code-only as a faint offset far-side outline) made it read muddy and was dropped. No Three.js.
 
 ## Circuit page (`circuit.html`)
 
@@ -99,22 +104,22 @@ One cinematic layer, kept quiet: it should feel like a film, not a trailer.
 The only motion on the site:
 
 1. The Horizon painting crossfade (0.8s, every 8s). The theme changes with it in one step, no crossfade.
-2. The F1 car lapping the screen edge.
+2. The F1 car lapping the screen edge on its road, wheels spinning, with a loop-the-loop every third lap.
 3. The car lapping a drawn track on the circuit page.
 4. Kinetic type, pure CSS scroll timelines: the nameplate's weight eases from 560 to 400 over the first 70vh of scroll, and each section label's weight goes from 300 to 500 as it enters. A whisper, never more.
 5. Line reveals, pure CSS view timelines: labels, row names and tags, palette items and the footer rise and unclip once as they enter (over roughly the first 12% of their trip up the screen; the footer finishes as soon as it is fully in view).
-6. The director's cut (see above): opening credits, Ken Burns with settle, rack focus and letterbox squeeze on each cut, the living painting, the gold timeline, the glass sheen, the pointer lean and the scroll dolly.
+6. The director's cut (see above): the painted opening, Ken Burns with settle, rack focus and letterbox squeeze on each cut, the living painting, the gold timeline, the glass sheen, the pointer lean with its cursor light and backdrop parallax, and the scroll dolly.
 
-Curves: Apple's ease-out, `cubic-bezier(0,0,.58,1)`, for fades and the letterbox (`--ease-apple`), and a gentle spring (response 0.5s, damping 0.82, about 1% overshoot, as CSS `linear()`) for the camera lean and the row chevron (`--spring`).
+Curves: Apple's ease-out, `cubic-bezier(0,0,.58,1)`, for fades and the letterbox (`--ease-apple`), and a gentle spring (response 0.5s, damping 0.82, about 1% overshoot, as CSS `linear()`) for the camera lean, the cursor light and the row chevron (`--spring`).
 
 Everything else is static. No GSAP, no Lenis, no JS-driven scroll effects, no parallax beyond the band's dolly, no magnetic hover, no blinking/live dots, no counters or progress dots, no typing or loading animations, no hover transitions. 4 and 5 only run where `animation-timeline` is supported; all of it is off under `prefers-reduced-motion: reduce`, and nothing is ever left hidden.
 
 ## Files
 
-- `index.html`: markup, including the opening and letterbox, the Horizon band and its atmosphere layers, the palette section and the car SVG, plus the small head script that decides whether the opening plays.
+- `index.html`: markup, including the opening (stage canvases, name, Skip) and letterbox, the Horizon band with its backdrop, atmosphere and cursor-light layers, the palette section and the car and road SVGs, plus the small head script that decides whether the opening plays.
 - `styles.css`: all styling for both pages, the registered theme colours, the band's mask/wash/tint, and the crossfades.
-- `horizon.js`: the band: the endless stream (AIC, Cleveland and Met sources, dedupe, calm check), fallbacks, crossfade, credit, palette sampling and theme, plus per-painting drift, rack focus, letterbox squeeze, glass sheen and the gold-line clock.
-- `cinema.js`: ending or skipping the opening credits, and the pointer lean.
-- `site.js`: social icons, scripted chat + optional AI endpoint (`CHAT_ENDPOINT`), the perimeter car lap, row preview tap/click toggling.
+- `horizon.js`: the band: the endless stream (AIC, Cleveland and Met sources, dedupe, calm check), fallbacks, crossfade, the blurred backdrop, credit, palette sampling and theme, plus per-painting drift, rack focus, letterbox squeeze, glass sheen and the gold-line clock. Starts on The Hay Wain and hands it to the opening when the opening plays.
+- `cinema.js`: the opening (painting the strokes, the name, the car crossing, Skip and the lift), and the pointer lean and cursor light.
+- `site.js`: social icons, scripted chat + optional AI endpoint (`CHAT_ENDPOINT`), the perimeter car lap with its road and loop-the-loop, row preview tap/click toggling.
 - `circuit.html` + `circuit.js`: the draw-a-circuit page and its lap sim.
 - `chat-worker/`: Cloudflare Worker backend for the chat (see its README).
